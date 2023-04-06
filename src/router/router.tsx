@@ -1,6 +1,11 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-const customRouter = createBrowserRouter([]);
+const customRouter = createBrowserRouter([
+    {
+        path: "/",
+        element: <></>
+    }
+]);
 
 export default customRouter;
