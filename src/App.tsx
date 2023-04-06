@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import locales, { LocaleContext } from "../locales/locales";
 import { RouterProvider } from "react-router-dom";
-import router from "./router/router";
+import router from "./router";
 
 const App: React.FC = () => {
     const [localeIndex, setLocaleIndex] = useState(0);
