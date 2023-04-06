@@ -1,7 +1,16 @@
-import React,{useContext} from "react";
+import React, { useState } from "react";
+import locales, { LocaleContext } from "../locales/locales";
+import { RouterProvider } from "react-router-dom";
+import router from "./router/router";
 
 const App: React.FC = () => {
-    return <div className="App"></div>;
+    const [localeIndex, setLocaleIndex] = useState(0);
+
+    return (
+        <LocaleContext.Provider value={locales[localeIndex].locale}>
+            <RouterProvider router={router} />
+        </LocaleContext.Provider>
+    );
 };
 
 export default App;
