@@ -20,6 +20,7 @@ html {
   -ms-text-size-adjust: 100%;
   -ms-overflow-style: scrollbar;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  font-size: 62.5%; /* 10px simplification: 62.5% of 16px = 10px */
 }
 @-ms-viewport {
   width: device-width;
