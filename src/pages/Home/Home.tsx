@@ -62,13 +62,15 @@ const sideMenuList: (SideMenuItemData | "Divider")[] = [
 type SyntaxType = "LR0" | "LR1" | "SLR" | "LALR" | "LL";
 const syntaxTypeList: SyntaxType[] = ["LR0", "SLR", "LR1", "LALR", "LL"];
 
+const bottomDrawerHeight = "24rem";
+
 const Home = () => {
     const [drawOpen, setDrawOpen] = useState(false);
 
-    const [syntaxType, setSyntaxType] = useState<SyntaxType | "None">("LR0");
+    const [syntaxType, setSyntaxType] = useState<SyntaxType | false>("LR0");
     const handleChangeSyntaxType = (newType: SyntaxType) => {
         setSyntaxType(current => {
-            if (current === newType) return "None";
+            if (current === newType) return false;
             return newType;
         });
     };
@@ -145,63 +147,72 @@ const Home = () => {
                     <Stack
                         direction={"row"}
                         alignItems="stretch"
-                        sx={{ flex: 1 }}>
+                        sx={{
+                            flex: 1,
+                            height: 0,
+                            transition: theme =>
+                                bottomDrawerOpen
+                                    ? theme.transitions.create("margin", {
+                                          easing: theme.transitions.easing
+                                              .easeOut,
+                                          duration:
+                                              theme.transitions.duration
+                                                  .enteringScreen
+                                      })
+                                    : theme.transitions.create("margin", {
+                                          easing: theme.transitions.easing
+                                              .sharp,
+                                          duration:
+                                              theme.transitions.duration
+                                                  .leavingScreen
+                                      }),
+                            marginBottom: bottomDrawerOpen
+                                ? `${bottomDrawerHeight}`
+                                : 0
+                        }}>
                         <Stack
                             sx={{ boxShadow: 4 }}
                             justifyContent="space-between">
-                            <ToggleButtonGroup
-                                orientation="vertical"
-                                exclusive
+                            <Tabs
+                                onChange={(_, newType) => {
+                                    // console.log("new type =", newType);
+                                    handleChangeSyntaxType(newType);
+                                }}
                                 value={syntaxType}
-                                onChange={(e, newType) =>
-                                    handleChangeSyntaxType(newType)
-                                }>
+                                orientation="vertical"
+                                variant="scrollable">
                                 {syntaxTypeList.map(syntaxTypeItem => (
-                                    <ToggleButton
-                                        sx={{
-                                            height: "7.2rem",
-                                            width: "7.2rem",
-                                            border: "none",
-                                            "&.Mui-selected": {
-                                                backgroundColor: "transparent",
-                                                color: theme =>
-                                                    theme.palette.primary.main,
-                                                "&:hover": {
-                                                    backgroundColor: theme =>
-                                                        alpha(
-                                                            theme.palette
-                                                                .primary.main,
-                                                            0.1
-                                                        )
-                                                }
-                                            }
-                                        }}
-                                        value={syntaxTypeItem}>
-                                        <Typography>
-                                            {syntaxTypeItem}
-                                        </Typography>
-                                    </ToggleButton>
+                                    <Tab
+                                        sx={{ height: "7.2rem" }}
+                                        label={syntaxTypeItem}
+                                        value={syntaxTypeItem}
+                                    />
                                 ))}
-                            </ToggleButtonGroup>
-                            <Stack alignItems={"center"}>
-                                <IconButton
-                                    onClick={() =>
-                                        setBottomDrawerOpen(current => !current)
-                                    }
-                                    sx={{ height: "3.6rem", width: "3.6rem" }}>
-                                    <KeyboardIcon />
-                                </IconButton>
-                            </Stack>
-                        </Stack>
-                        <Stack maxWidth={"32rem"}>
-                            <Box width={"32rem"} sx={{ flex: 1 }}>
-                                <Stack
-                                    height={"100%"}
-                                    alignItems={"center"}
-                                    justifyContent="center">
-                                    <Typography>文法输入区域占位符</Typography>
+                            </Tabs>
+                            {!bottomDrawerOpen && (
+                                <Stack alignItems={"center"}>
+                                    <IconButton
+                                        onClick={() =>
+                                            setBottomDrawerOpen(
+                                                current => !current
+                                            )
+                                        }
+                                        sx={{
+                                            height: "3.6rem",
+                                            width: "3.6rem"
+                                        }}>
+                                        <KeyboardIcon />
+                                    </IconButton>
                                 </Stack>
-                            </Box>
+                            )}
+                        </Stack>
+                        <Stack width={"32rem"} padding="2.4rem">
+                            <Stack
+                                height={"100%"}
+                                alignItems={"center"}
+                                justifyContent="center">
+                                <Typography>文法输入区域占位符</Typography>
+                            </Stack>
                         </Stack>
                     </Stack>
                 </Drawer>
@@ -215,7 +226,28 @@ const Home = () => {
                     variant="permanent">
                     <Toolbar />
                     <Stack
-                        sx={{ flex: 1 }}
+                        sx={{
+                            flex: 1,
+                            transition: theme =>
+                                bottomDrawerOpen
+                                    ? theme.transitions.create("margin", {
+                                          easing: theme.transitions.easing
+                                              .easeOut,
+                                          duration:
+                                              theme.transitions.duration
+                                                  .enteringScreen
+                                      })
+                                    : theme.transitions.create("margin", {
+                                          easing: theme.transitions.easing
+                                              .sharp,
+                                          duration:
+                                              theme.transitions.duration
+                                                  .leavingScreen
+                                      }),
+                            marginBottom: bottomDrawerOpen
+                                ? `${bottomDrawerHeight}`
+                                : 0
+                        }}
                         width="32rem"
                         alignItems={"center"}
                         justifyContent="center">
@@ -227,7 +259,7 @@ const Home = () => {
                     variant="persistent"
                     open={bottomDrawerOpen}>
                     <Stack
-                        height={"24rem"}
+                        height={bottomDrawerHeight}
                         sx={{ position: "relative" }}
                         alignItems={"center"}
                         justifyContent="center">
