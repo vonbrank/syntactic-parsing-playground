@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { DefaultAppContainer } from "../../components/Container";
 import {
     AnalysisTablePanel,
     SyntaxInputPanel,
     AnalysisPatternPanel
 } from "./components/Panel";
 import { AnalysisPanelsContainer } from "./components/Container";
+import { DefaultAppContainer } from "@/components/Container";
 
 const bottomDrawerHeight = "24rem";
 
