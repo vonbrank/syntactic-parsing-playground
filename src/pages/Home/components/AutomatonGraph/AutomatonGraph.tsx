@@ -1,5 +1,13 @@
-import { Box, useTheme } from "@mui/material";
+import {
+    Box,
+    BoxProps,
+    Stack,
+    StackProps,
+    Typography,
+    useTheme
+} from "@mui/material";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom/client";
 import * as d3 from "d3";
 
 interface AutomatonState {
@@ -34,12 +42,12 @@ export const exampleAutomaton: AutomatonState[] = [
                 targetId: "4"
             }
         ],
-        itemSets: []
+        itemSets: ["S' → ·S", "S → ·BB", "B → ·aB", "B → ·b"]
     },
     {
         id: "1",
         transfers: [],
-        itemSets: []
+        itemSets: ["S' →S·"]
     },
     {
         id: "2",
@@ -57,7 +65,7 @@ export const exampleAutomaton: AutomatonState[] = [
                 targetId: "4"
             }
         ],
-        itemSets: []
+        itemSets: ["S→B·B", "B→·aB", "B→·b"]
     },
     {
         id: "3",
@@ -75,22 +83,22 @@ export const exampleAutomaton: AutomatonState[] = [
                 targetId: "4"
             }
         ],
-        itemSets: []
+        itemSets: ["B → a·B", "B → ·aB", "B → ·b"]
     },
     {
         id: "4",
         transfers: [],
-        itemSets: []
+        itemSets: ["B → b·"]
     },
     {
         id: "5",
         transfers: [],
-        itemSets: []
+        itemSets: ["S → BB·"]
     },
     {
         id: "6",
         transfers: [],
-        itemSets: []
+        itemSets: ["B → aB·"]
     }
 ];
 
@@ -108,6 +116,10 @@ interface AutomatonGraphInfo {
     };
 }
 
+const NODE_MAX_DISTANCE = 500;
+const NODE_DISTANCE = 400;
+const NODE_COLLISION_RADIUS = 200;
+
 const AutomatonGraph = (props: AutomatonGraphProps) => {
     const { automatonStates } = props;
 
@@ -124,7 +136,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         graph: {
             nodes: automatonStates.map(state => ({
                 id: state.id,
-                itemSets: []
+                itemSets: [...state.itemSets]
             })),
             links: automatonStates.reduce((acc, state) => {
                 const currentLinks: d3Link[] = state.transfers.map(
@@ -139,8 +151,11 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         },
         simulation: d3
             .forceSimulation<d3Node>()
-            .force("charge", d3.forceManyBody().strength(-50).distanceMax(2000))
-            .force("collide", d3.forceCollide().radius(100)),
+            .force(
+                "charge",
+                d3.forceManyBody().strength(-50).distanceMax(NODE_MAX_DISTANCE)
+            )
+            .force("collide", d3.forceCollide().radius(NODE_COLLISION_RADIUS)),
         svgTransform: {
             x: 0,
             y: 0,
@@ -188,7 +203,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             d3Link,
             SVGSVGElement,
             unknown
-        > = context.selectAll("line");
+        > = context.selectAll(".links line");
         const texts: d3.Selection<
             SVGTextElement,
             d3Node,
@@ -196,11 +211,11 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             unknown
         > = context.selectAll("text.node-text");
         const nodes: d3.Selection<
-            SVGCircleElement,
+            SVGForeignObjectElement,
             d3Node,
             SVGSVGElement,
             unknown
-        > = context.selectAll("circle");
+        > = context.selectAll(".nodes .automaton-state-class");
 
         const ticked = () => {
             const getNodeById = (nodes: d3Node[], id: string) => {
@@ -221,13 +236,12 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     return getNodeById(data.nodes, d.target).y || 0;
                 });
 
-            nodes
-                .attr("cx", function (d: d3Node) {
-                    return d.x || 0;
-                })
-                .attr("cy", function (d: d3Node) {
-                    return d.y || 0;
-                });
+            nodes.attr("transform", d => {
+                return (
+                    d &&
+                    `translate(${d.x ? d.x - 64 : 0}, ${d.y ? d.y - 96 : 0})`
+                );
+            });
 
             texts
                 .attr("x", function (d: d3Node) {
@@ -245,7 +259,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     data.links.map(link => ({ ...link }))
                 )
                 .id(d => d.id)
-                .distance(200)
+                .distance(NODE_DISTANCE)
         );
         simulation.on("tick", ticked);
 
@@ -353,9 +367,10 @@ const Nodes = forwardRef<{
         if (ref === null || typeof ref === "function") return;
 
         const currentRef = ref.current;
-        if (currentRef === null) return;
+        const currentGRef = gRef.current;
+        if (currentRef === null || currentGRef === null) return;
 
-        const context = d3.select(gRef.current);
+        const context = d3.select(currentGRef);
         const color = d3.scaleOrdinal(d3.schemeCategory10);
         const simulation = currentRef.simulation;
 
@@ -384,25 +399,46 @@ const Nodes = forwardRef<{
             .on("end", dragended);
 
         const nodes = context
-            .selectAll("circle")
+            .selectAll(".automaton-state-class")
             .data(currentRef.nodes)
-            .enter()
-            .append("circle")
-            .attr("r", 15)
-            .attr("fill", theme.palette.primary.main)
-            .style("overflow", "visible")
-            .call(drag);
+            .join(
+                enter =>
+                    enter
+                        .append("foreignObject")
+                        .call(drag)
+                        .attr(
+                            "class",
+                            d =>
+                                `automaton-state-class-${d.id} automaton-state-class`
+                        )
+                        .attr("width", "12.8rem")
+                        .attr("height", "19.2rem")
+                        .attr("overflow", "visible")
+                        .style("outline", "none")
+                        .attr("id", d => `foreign_${d.id}`),
+                update => update,
+                exit => exit.remove()
+            );
 
-        context
-            .selectAll("text")
-            .data(currentRef.nodes)
-            .enter()
-            .append("text")
-            .attr("class", "node-text")
-            .style("pointer-events", "none")
-            .text(function (d: d3Node) {
-                return d.id;
-            });
+        currentRef.nodes.forEach(node => {
+            const className = `automaton-state-class-${node.id}`;
+            const [rootElement] = currentGRef.getElementsByClassName(className);
+
+            ReactDOM.createRoot(rootElement).render(
+                <AutomatonState
+                    sx={{
+                        background: theme => theme.palette.background.paper,
+                        width: 128,
+                        height: 192,
+                        boxSizing: "border-box",
+                        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
+                    }}
+                    className="automaton-state-container"
+                    id={node.id}
+                    itemSets={node.itemSets}
+                />
+            );
+        });
     }, []);
 
     return <g className="nodes" ref={gRef} />;
@@ -433,3 +469,34 @@ const Links = forwardRef<{
 
     return <g className="links" ref={gRef} />;
 });
+
+interface AutomatonStateProps extends StackProps {
+    id: string;
+    itemSets: string[];
+}
+
+const AutomatonState = (props: AutomatonStateProps) => {
+    const { id, itemSets, sx, ...others } = props;
+    return (
+        <Stack
+            sx={{
+                padding: "1.6rem",
+                ...sx
+            }}
+            {...others}>
+            <Typography
+                variant="body1"
+                sx={{ fontSize: "2.4rem" }}>{`I${id}:`}</Typography>
+            <Stack>
+                {itemSets.map((item, index) => (
+                    <Typography
+                        variant="body1"
+                        key={index}
+                        sx={{ fontSize: "2rem" }}>
+                        {item}
+                    </Typography>
+                ))}
+            </Stack>
+        </Stack>
+    );
+};
