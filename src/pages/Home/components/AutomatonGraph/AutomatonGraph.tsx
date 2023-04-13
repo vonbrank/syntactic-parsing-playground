@@ -101,6 +101,11 @@ interface AutomatonGraphProps {
 interface AutomatonGraphInfo {
     graph: d3Graph;
     simulation: d3.Simulation<d3Node, any>;
+    svgTransform: {
+        x: number;
+        y: number;
+        k: number;
+    };
 }
 
 const AutomatonGraph = (props: AutomatonGraphProps) => {
@@ -111,6 +116,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
 
     const automatonContainerRef = useRef<HTMLDivElement>(null);
     const automatonSvgRef = useRef<SVGSVGElement>(null);
+    const automatonSvgGRef = useRef<SVGGElement>(null);
 
     const theme = useTheme();
 
@@ -134,7 +140,12 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         simulation: d3
             .forceSimulation<d3Node>()
             .force("charge", d3.forceManyBody().strength(-50).distanceMax(2000))
-            .force("collide", d3.forceCollide().radius(100))
+            .force("collide", d3.forceCollide().radius(100)),
+        svgTransform: {
+            x: 0,
+            y: 0,
+            k: 1
+        }
     });
 
     const linksRef = useRef<{
@@ -155,12 +166,15 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
     });
 
     const runSimulation = () => {
-        console.log("start simulation...");
+        console.log("running simulation...");
 
         const currentAutomatonSvgRef = automatonSvgRef.current;
-        if (currentAutomatonSvgRef === null) return;
+        const currentAutomatonSvgGRef = automatonSvgGRef.current;
+        if (currentAutomatonSvgRef === null || currentAutomatonSvgGRef === null)
+            return;
 
         const context = d3.select(currentAutomatonSvgRef);
+        const g = d3.select(currentAutomatonSvgGRef);
 
         const currentAutomatonGraphInfoRef = automatonGraphInfoRef.current;
 
@@ -234,6 +248,32 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 .distance(200)
         );
         simulation.on("tick", ticked);
+
+        const zoom = d3
+            .zoom<SVGSVGElement, unknown>()
+            .scaleExtent([0, 40])
+            .on("zoom", event => {
+                const { transform } = event;
+                g.attr("transform", transform);
+                automatonGraphInfoRef.current.svgTransform = transform;
+                // console.log("current transform = ", transform);
+            })
+            .filter(function (event) {
+                // 滚动缩放须同时按住`Alt`键，拖拽不需要
+                return (
+                    (event.altKey && event.type === "wheel") ||
+                    event.type === "mousedown"
+                );
+            });
+        const currentTransform = automatonGraphInfoRef.current.svgTransform;
+        context
+            .call(zoom)
+            .call(
+                zoom.transform,
+                d3.zoomIdentity
+                    .translate(currentTransform.x, currentTransform.y)
+                    .scale(currentTransform.k)
+            );
     };
 
     useEffect(() => {
@@ -274,8 +314,10 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             }}
             ref={automatonContainerRef}>
             <svg ref={automatonSvgRef} width={width} height={height}>
-                <Links ref={linksRef} />
-                <Nodes ref={nodesRef} />
+                <g ref={automatonSvgGRef}>
+                    <Links ref={linksRef} />
+                    <Nodes ref={nodesRef} />
+                </g>
             </svg>
         </Box>
     );
