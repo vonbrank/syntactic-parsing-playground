@@ -36,6 +36,7 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                     variant="scrollable">
                     {syntaxTypeList.map(syntaxTypeItem => (
                         <Tab
+                            key={syntaxTypeItem}
                             sx={{ height: "7.2rem" }}
                             label={syntaxTypeItem}
                             value={syntaxTypeItem}
