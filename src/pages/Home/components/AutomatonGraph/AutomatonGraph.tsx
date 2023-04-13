@@ -154,19 +154,11 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         simulation: automatonGraphInfoRef.current.simulation
     });
 
-    useEffect(() => {
-        const currentAutomatonContainerRef = automatonContainerRef.current;
-        const currentAutomatonSvgRef = automatonSvgRef.current;
-        if (
-            currentAutomatonContainerRef === null ||
-            currentAutomatonSvgRef === null
-        )
-            return;
+    const runSimulation = () => {
+        console.log("start simulation...");
 
-        const clientWidth = currentAutomatonContainerRef.clientWidth;
-        const clientHeight = currentAutomatonContainerRef.clientHeight;
-        setWidth(clientWidth);
-        setHeight(clientHeight);
+        const currentAutomatonSvgRef = automatonSvgRef.current;
+        if (currentAutomatonSvgRef === null) return;
 
         const context = d3.select(currentAutomatonSvgRef);
 
@@ -175,10 +167,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         const data = currentAutomatonGraphInfoRef.graph;
 
         const simulation = currentAutomatonGraphInfoRef.simulation;
-        simulation.force(
-            "center",
-            d3.forceCenter(clientWidth / 2, clientHeight / 2)
-        );
+        simulation.force("center", d3.forceCenter(width / 2, height / 2));
 
         const links: d3.Selection<
             SVGLineElement,
@@ -245,7 +234,34 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 .distance(200)
         );
         simulation.on("tick", ticked);
+    };
+
+    useEffect(() => {
+        const updateSize = () => {
+            const currentAutomatonContainerRef = automatonContainerRef.current;
+            if (currentAutomatonContainerRef === null) return;
+
+            const clientWidth = currentAutomatonContainerRef.clientWidth;
+            const clientHeight = currentAutomatonContainerRef.clientHeight;
+            setWidth(clientWidth);
+            setHeight(clientHeight);
+        };
+
+        updateSize();
+        runSimulation();
+
+        window.addEventListener("resize", updateSize);
+
+        return () => {
+            window.removeEventListener("resize", updateSize);
+        };
     }, []);
+
+    useEffect(() => {
+        const simulation = automatonGraphInfoRef.current.simulation;
+        simulation.force("center", d3.forceCenter(width / 2, height / 2));
+        simulation.alpha(1).restart();
+    }, [width, height]);
 
     return (
         <Box
