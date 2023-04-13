@@ -19,7 +19,7 @@ import InfoIcon from "@mui/icons-material/Info";
 
 interface SideMenuItemData {
     label: string;
-    icon: JSX.Element;
+    icon: React.ReactNode;
 }
 
 const sideMenuList: (SideMenuItemData | "Divider")[] = [

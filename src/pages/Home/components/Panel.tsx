@@ -5,58 +5,16 @@ import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
 
-interface SidePanelBaseProps extends StackProps {
+interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
     setBottomDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    bottomDrawerHeight: string;
 }
-
-const SidePanelBase = (props: SidePanelBaseProps) => {
-    const {
-        bottomDrawerOpen,
-        setBottomDrawerOpen,
-        bottomDrawerHeight,
-        direction = "row",
-        alignItems = "stretch",
-        sx,
-        children,
-        ...others
-    } = props;
-
-    return (
-        <Stack
-            direction={direction}
-            alignItems={alignItems}
-            sx={{
-                flex: 1,
-                height: 0,
-                transition: theme =>
-                    bottomDrawerOpen
-                        ? theme.transitions.create("margin", {
-                              easing: theme.transitions.easing.easeOut,
-                              duration:
-                                  theme.transitions.duration.enteringScreen
-                          })
-                        : theme.transitions.create("margin", {
-                              easing: theme.transitions.easing.sharp,
-                              duration: theme.transitions.duration.leavingScreen
-                          }),
-                marginBottom: bottomDrawerOpen ? `${bottomDrawerHeight}` : 0,
-                ...(sx || {})
-            }}
-            {...others}>
-            {children}
-        </Stack>
-    );
-};
-
-interface SyntaxInputPanelProps extends SidePanelBaseProps {}
 
 type SyntaxType = "LR0" | "LR1" | "SLR" | "LALR" | "LL";
 const syntaxTypeList: SyntaxType[] = ["LR0", "SLR", "LR1", "LALR", "LL"];
 
 export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
-    const { bottomDrawerOpen, setBottomDrawerOpen, ...others } = props;
+    const { bottomDrawerOpen, setBottomDrawerOpen } = props;
 
     const [syntaxType, setSyntaxType] = useState<SyntaxType | false>("LR0");
     const handleChangeSyntaxType = (newType: SyntaxType) => {
@@ -67,10 +25,7 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
     };
 
     return (
-        <SidePanelBase
-            bottomDrawerOpen={bottomDrawerOpen}
-            setBottomDrawerOpen={setBottomDrawerOpen}
-            {...others}>
+        <>
             <Stack sx={{ boxShadow: 4 }} justifyContent="space-between">
                 <Tabs
                     onChange={(_, newType) => {
@@ -110,27 +65,22 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                     <Typography>文法输入区域占位符</Typography>
                 </Stack>
             </Stack>
-        </SidePanelBase>
+        </>
     );
 };
 
-interface AnalysisTablePanelProps extends SidePanelBaseProps {}
+interface AnalysisTablePanelProps {}
 
 export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
-    const {
-        width = "32rem",
-        alignItems = "center",
-        justifyContent = "center",
-        ...others
-    } = props;
     return (
-        <SidePanelBase
-            width={width}
-            alignItems={alignItems}
-            justifyContent={justifyContent}
-            {...others}>
-            <Typography>分析表显示区域占位符</Typography>
-        </SidePanelBase>
+        <Stack width={"32rem"} padding="2.4rem">
+            <Stack
+                height={"100%"}
+                alignItems={"center"}
+                justifyContent="center">
+                <Typography>分析表显示区域占位符</Typography>
+            </Stack>
+        </Stack>
     );
 };
 

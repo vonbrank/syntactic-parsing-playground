@@ -11,7 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 
 interface DefaultAppBarProps extends AppBarProps {
     onMenuButtonClick?: () => void;
-    appBarTitle?: JSX.Element;
+    appBarTitle?: React.ReactNode;
 }
 
 const DefaultAppBar = (props: DefaultAppBarProps) => {
