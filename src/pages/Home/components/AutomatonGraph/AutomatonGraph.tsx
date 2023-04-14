@@ -7,7 +7,8 @@ import {
     useTheme
 } from "@mui/material";
 import React, { forwardRef, useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom/client";
+// import ReactDOM from "react-dom/client";
+import ReactDOM from "react-dom";
 import * as d3 from "d3";
 
 interface AutomatonState {
@@ -363,6 +364,41 @@ const Nodes = forwardRef<{
 
     const theme = useTheme();
 
+    const [nodePortals, setNodePortals] = useState<React.ReactPortal[]>([]);
+
+    const renderNodes = () => {
+        if (ref === null || typeof ref === "function") return;
+
+        const currentRef = ref.current;
+        const currentGRef = gRef.current;
+        if (currentRef === null || currentGRef === null) return;
+
+        const newPortals: React.ReactPortal[] = [];
+
+        currentRef.nodes.forEach(node => {
+            const className = `automaton-state-class-${node.id}`;
+            const [rootElement] = currentGRef.getElementsByClassName(className);
+            const newPortal = ReactDOM.createPortal(
+                <AutomatonState
+                    sx={{
+                        background: theme => theme.palette.background.paper,
+                        width: 128,
+                        height: 192,
+                        boxSizing: "border-box",
+                        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
+                    }}
+                    className="automaton-state-container"
+                    id={node.id}
+                    itemSets={node.itemSets}
+                />,
+                rootElement
+            );
+            newPortals.push(newPortal);
+        });
+
+        setNodePortals(newPortals);
+    };
+
     useEffect(() => {
         if (ref === null || typeof ref === "function") return;
 
@@ -419,29 +455,15 @@ const Nodes = forwardRef<{
                 update => update,
                 exit => exit.remove()
             );
-
-        currentRef.nodes.forEach(node => {
-            const className = `automaton-state-class-${node.id}`;
-            const [rootElement] = currentGRef.getElementsByClassName(className);
-
-            ReactDOM.createRoot(rootElement).render(
-                <AutomatonState
-                    sx={{
-                        background: theme => theme.palette.background.paper,
-                        width: 128,
-                        height: 192,
-                        boxSizing: "border-box",
-                        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
-                    }}
-                    className="automaton-state-container"
-                    id={node.id}
-                    itemSets={node.itemSets}
-                />
-            );
-        });
+        renderNodes();
     }, []);
 
-    return <g className="nodes" ref={gRef} />;
+    return (
+        <>
+            <g className="nodes" ref={gRef} />
+            {nodePortals.map(portal => portal)}
+        </>
+    );
 });
 
 const Links = forwardRef<{
