@@ -75,7 +75,7 @@ interface AnalysisTablePanelProps {}
 
 export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
     return (
-        <Stack width={"32rem"} padding="1.2rem">
+        <Stack width={"32rem"}>
             <Stack height={"100%"} alignItems="center">
                 <AnalysisTable />
             </Stack>
