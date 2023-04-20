@@ -4,7 +4,7 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
-import { AnalysisTable } from "./AnalysisTable/AnalysisTable";
+import AnalysisTable from "./AnalysisTable";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -76,9 +76,7 @@ interface AnalysisTablePanelProps {}
 export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
     return (
         <Stack width={"32rem"} padding="1.2rem">
-            <Stack
-                height={"100%"}
-                alignItems="center">
+            <Stack height={"100%"} alignItems="center">
                 <AnalysisTable />
             </Stack>
         </Stack>

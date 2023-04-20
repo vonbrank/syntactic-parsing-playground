@@ -24,7 +24,7 @@ function createData(
 
 interface AnalysisTableProps {}
 
-export const AnalysisTable = function (props: AnalysisTableProps) {
+const AnalysisTable = function (props: AnalysisTableProps) {
     const headCells: Array<ReactElement> = [];
 
     Object.entries(tableData[0].action).forEach(entry => {
@@ -85,7 +85,12 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
                         <TableCell
                             align="center"
                             rowSpan={2}
-                            sx={{ position: "sticky", left: 0, zIndex: 3 }}>
+                            sx={{
+                                position: "sticky",
+                                left: 0,
+                                zIndex: 3,
+                                borderRight: "1px solid rgba(224, 224, 224, 1)"
+                            }}>
                             <Typography>状态</Typography>
                         </TableCell>
                         <TableCell align="center" colSpan={actionSize}>
@@ -109,7 +114,9 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
                         "& .MuiTableRow-root .MuiTableCell-root:first-child": {
                             position: "sticky",
                             left: 0,
-                            backgroundColor: theme => theme.palette.common.white
+                            backgroundColor: theme =>
+                                theme.palette.common.white,
+                            borderRight: "1px solid rgba(224, 224, 224, 1)"
                         }
                     }}>
                     {...bodyRow}
@@ -120,3 +127,5 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
         </TableContainer>
     );
 };
+
+export default AnalysisTable;
