@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
 import AnalysisTable from "./AnalysisTable";
+import SyntaxInputSection from "./SyntaxInputSection";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -27,7 +28,9 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
 
     return (
         <>
-            <Stack sx={{ boxShadow: 4 }} justifyContent="space-between">
+            <Stack
+                sx={{ boxShadow: 4, zIndex: theme => theme.zIndex.drawer - 2 }}
+                justifyContent="space-between">
                 <Tabs
                     onChange={(_, newType) => {
                         handleChangeSyntaxType(newType);
@@ -59,12 +62,9 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                     </Stack>
                 )}
             </Stack>
-            <Stack width={"32rem"} padding="2.4rem">
-                <Stack
-                    height={"100%"}
-                    alignItems={"center"}
-                    justifyContent="center">
-                    <Typography>文法输入区域占位符</Typography>
+            <Stack width={"32rem"} sx={{ overflowY: "auto" }}>
+                <Stack height={"100%"} alignItems={"center"}>
+                    <SyntaxInputSection />
                 </Stack>
             </Stack>
         </>
