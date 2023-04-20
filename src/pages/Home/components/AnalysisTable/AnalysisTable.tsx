@@ -78,7 +78,7 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
 
     return (
         <TableContainer component={Paper}>
-            <Table sx={{ minWidth: "40rem" }} aria-label="simple table">
+            <Table sx={{ minWidth: "40rem" }} stickyHeader>
                 <TableHead>
                     <TableRow>
                         <TableCell align="center" rowSpan={2}>
@@ -93,7 +93,11 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
                     </TableRow>
                     <TableRow>{...headCells}</TableRow>
                 </TableHead>
-                <TableBody>{...bodyRow}</TableBody>
+                <TableBody>
+                    {...bodyRow}
+                    {...bodyRow}
+                    {...bodyRow}
+                </TableBody>
             </Table>
         </TableContainer>
     );
