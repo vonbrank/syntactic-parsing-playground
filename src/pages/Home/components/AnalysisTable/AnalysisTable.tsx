@@ -10,6 +10,7 @@ import Paper from "@mui/material/Paper";
 import { actionSize, gotoSize, tableData } from "./AnalysisTableData";
 import { ReactElement } from "react";
 import Typography from "@mui/material/Typography";
+import { border } from "@mui/system";
 
 function createData(
     name: string,
@@ -44,7 +45,7 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
     const bodyRow: Array<ReactElement> = [];
     tableData.forEach((stateRow, index) => {
         const cells: Array<ReactElement> = [];
-        Object.entries(stateRow.action).forEach(entry => {
+        Object.entries(stateRow.action).forEach((entry, index) => {
             cells.push(
                 <TableCell align="center">
                     <Typography>{entry[1]}</Typography>
@@ -81,7 +82,10 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
             <Table sx={{ minWidth: "40rem" }} stickyHeader>
                 <TableHead>
                     <TableRow>
-                        <TableCell align="center" rowSpan={2}>
+                        <TableCell
+                            align="center"
+                            rowSpan={2}
+                            sx={{ position: "sticky", left: 0, zIndex: 3 }}>
                             <Typography>状态</Typography>
                         </TableCell>
                         <TableCell align="center" colSpan={actionSize}>
@@ -91,9 +95,23 @@ export const AnalysisTable = function (props: AnalysisTableProps) {
                             <Typography>GOTO</Typography>
                         </TableCell>
                     </TableRow>
-                    <TableRow>{...headCells}</TableRow>
+                    <TableRow
+                        sx={{
+                            "& .MuiTableCell-root": {
+                                top: "calc(2.4rem + 32px + 1px)"
+                            }
+                        }}>
+                        {...headCells}
+                    </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody
+                    sx={{
+                        "& .MuiTableRow-root .MuiTableCell-root:first-child": {
+                            position: "sticky",
+                            left: 0,
+                            backgroundColor: theme => theme.palette.common.white
+                        }
+                    }}>
                     {...bodyRow}
                     {...bodyRow}
                     {...bodyRow}
