@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
+import { AnalysisTable } from "./AnalysisTable/AnalysisTable";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -74,12 +75,11 @@ interface AnalysisTablePanelProps {}
 
 export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
     return (
-        <Stack width={"32rem"} padding="2.4rem">
+        <Stack width={"32rem"} padding="1.2rem">
             <Stack
                 height={"100%"}
-                alignItems={"center"}
-                justifyContent="center">
-                <Typography>分析表显示区域占位符</Typography>
+                alignItems="center">
+                <AnalysisTable />
             </Stack>
         </Stack>
     );
