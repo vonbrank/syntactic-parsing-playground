@@ -10,7 +10,7 @@ import Paper from "@mui/material/Paper";
 import { actionSize, gotoSize, tableData } from "./AnalysisTableData";
 import { ReactElement } from "react";
 import Typography from "@mui/material/Typography";
-import { border } from "@mui/system";
+import { Box } from "@mui/material";
 
 function createData(
     name: string,
@@ -78,53 +78,61 @@ const AnalysisTable = function (props: AnalysisTableProps) {
     });
 
     return (
-        <TableContainer component={Paper}>
-            <Table sx={{ minWidth: "40rem" }} stickyHeader>
-                <TableHead>
-                    <TableRow>
-                        <TableCell
-                            align="center"
-                            rowSpan={2}
+        <>
+            <Box padding="2.4rem">
+                <Typography textAlign="center">LR 分析表</Typography>
+            </Box>
+            <TableContainer component={Paper}>
+                <Table sx={{ minWidth: "40rem" }} stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell
+                                align="center"
+                                rowSpan={2}
+                                sx={{
+                                    position: "sticky",
+                                    left: 0,
+                                    zIndex: 3,
+                                    borderRight:
+                                        "1px solid rgba(224, 224, 224, 1)"
+                                }}>
+                                <Typography>状态</Typography>
+                            </TableCell>
+                            <TableCell align="center" colSpan={actionSize}>
+                                <Typography>ACTION</Typography>
+                            </TableCell>
+                            <TableCell align="center" colSpan={gotoSize}>
+                                <Typography>GOTO</Typography>
+                            </TableCell>
+                        </TableRow>
+                        <TableRow
                             sx={{
-                                position: "sticky",
-                                left: 0,
-                                zIndex: 3,
-                                borderRight: "1px solid rgba(224, 224, 224, 1)"
+                                "& .MuiTableCell-root": {
+                                    top: "calc(2.4rem + 32px + 1px)"
+                                }
                             }}>
-                            <Typography>状态</Typography>
-                        </TableCell>
-                        <TableCell align="center" colSpan={actionSize}>
-                            <Typography>ACTION</Typography>
-                        </TableCell>
-                        <TableCell align="center" colSpan={gotoSize}>
-                            <Typography>GOTO</Typography>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow
+                            {...headCells}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody
                         sx={{
-                            "& .MuiTableCell-root": {
-                                top: "calc(2.4rem + 32px + 1px)"
-                            }
+                            "& .MuiTableRow-root .MuiTableCell-root:first-child":
+                                {
+                                    position: "sticky",
+                                    left: 0,
+                                    backgroundColor: theme =>
+                                        theme.palette.common.white,
+                                    borderRight:
+                                        "1px solid rgba(224, 224, 224, 1)"
+                                }
                         }}>
-                        {...headCells}
-                    </TableRow>
-                </TableHead>
-                <TableBody
-                    sx={{
-                        "& .MuiTableRow-root .MuiTableCell-root:first-child": {
-                            position: "sticky",
-                            left: 0,
-                            backgroundColor: theme =>
-                                theme.palette.common.white,
-                            borderRight: "1px solid rgba(224, 224, 224, 1)"
-                        }
-                    }}>
-                    {...bodyRow}
-                    {...bodyRow}
-                    {...bodyRow}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                        {...bodyRow}
+                        {...bodyRow}
+                        {...bodyRow}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </>
     );
 };
 

@@ -10,7 +10,8 @@ import {
     TextField,
     TextFieldProps,
     Typography,
-    alpha
+    alpha,
+    Divider
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -18,15 +19,18 @@ import ClearIcon from "@mui/icons-material/Clear";
 
 const SyntaxInputSection = () => {
     return (
-        <Box>
-            <Box padding="2.4rem">
+        <>
+            <Box padding="2.4rem" sx={{ width: "100%" }}>
                 <Typography textAlign="center" marginBottom="2.4rem">
                     在此输入文法
                 </Typography>
                 <Stack>
                     <Stack spacing={"2rem"}>
-                        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(item => (
-                            <ProducerBlock key={item} />
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+                            <>
+                                {index !== 0 && <Divider />}
+                                <ProducerBlock key={item} />
+                            </>
                         ))}
                     </Stack>
                 </Stack>
@@ -49,7 +53,7 @@ const SyntaxInputSection = () => {
                     <Button variant="contained">分析</Button>
                 </Stack>
             </Box>
-        </Box>
+        </>
     );
 };
 
@@ -79,19 +83,28 @@ const ProducerBlock = () => {
     };
 
     return (
-        <div
+        <Box
             tabIndex={0}
             onFocus={() => setBlockFocus(true)}
-            onBlur={() => setBlockFocus(false)}>
-            <Stack direction="row">
-                <Stack sx={{ flex: 2 }}>
-                    <Stack alignItems="center" direction="row">
-                        <SyntaxInputTextField />
-                        <ArrowForwardIcon />
-                    </Stack>
-                </Stack>
-                <Stack sx={{ flex: 4 }}>
+            onBlur={() => setBlockFocus(false)}
+            sx={{
+                ":focus": {
+                    outline: "none"
+                }
+            }}>
+            <Stack>
+                <Stack>
                     <Stack spacing={"0.8rem"}>
+                        <Stack alignItems="center" direction="row">
+                            <Box sx={{ flex: 1, width: 0 }}>
+                                <SyntaxInputTextField />
+                            </Box>
+                            <Stack
+                                sx={{ flex: 1, width: 0 }}
+                                alignItems="center">
+                                <ArrowForwardIcon />
+                            </Stack>
+                        </Stack>
                         {producerRightSides.map((producerRightSide, index) => (
                             <SyntaxInputTextField
                                 key={index}
@@ -133,7 +146,7 @@ const ProducerBlock = () => {
                     </Collapse>
                 </Stack>
             </Stack>
-        </div>
+        </Box>
     );
 };
 
