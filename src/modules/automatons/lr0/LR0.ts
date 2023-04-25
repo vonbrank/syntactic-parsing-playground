@@ -1,4 +1,4 @@
-interface LR0Production {
+export interface LR0Production {
     leftSide: string;
     rightSide: string[];
 }

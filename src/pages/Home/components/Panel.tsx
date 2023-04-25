@@ -63,7 +63,7 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                 )}
             </Stack>
             <Stack width={"32rem"} sx={{ overflowY: "auto" }}>
-                <Stack height={"100%"} alignItems={"center"}>
+                <Stack alignItems={"center"} sx={{ flexGrow: 1 }}>
                     <SyntaxInputSection />
                 </Stack>
             </Stack>

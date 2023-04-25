@@ -15,23 +15,103 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
+import {
+    LR0Grammar,
+    LR0Production
+} from "../../../../modules/automatons/lr0/LR0";
 
 const SyntaxInputSection = () => {
+    const [grammar, setGrammar] = useState<LR0Grammar>({
+        productions: [
+            {
+                leftSide: "",
+                rightSide: [""]
+            }
+        ]
+    });
+
+    const handleChangeProduction = (
+        newProduction: LR0Production,
+        newIndex: number
+    ) => {
+        setGrammar(current => {
+            const newProductions = current.productions.map(
+                (production, index) => {
+                    if (index === newIndex) return newProduction;
+                    return production;
+                }
+            );
+            return {
+                ...current,
+                productions: newProductions
+            };
+        });
+    };
+
+    const handleAddProduction = () => {
+        setGrammar(current => {
+            return {
+                ...current,
+                productions: [
+                    ...current.productions,
+                    {
+                        leftSide: "",
+                        rightSide: [""]
+                    }
+                ]
+            };
+        });
+    };
+
+    const handleDeleteProduction = (deleteIndex: number) => {
+        setGrammar(current => {
+            return {
+                ...current,
+                productions: current.productions.filter(
+                    (_, index) => index !== deleteIndex
+                )
+            };
+        });
+    };
+
+    const handleAnalyse = () => {
+        console.log(grammar);
+    };
+
     return (
         <>
-            <Box padding="2.4rem" sx={{ width: "100%" }}>
+            <Box padding="2.4rem" sx={{ width: "100%", flex: 1 }}>
                 <Typography textAlign="center" marginBottom="2.4rem">
                     在此输入文法
                 </Typography>
                 <Stack>
                     <Stack spacing={"2rem"}>
-                        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+                        {grammar.productions.map((item, index) => (
                             <>
-                                {index !== 0 && <Divider />}
-                                <ProducerBlock key={item} />
+                                <ProducerBlock
+                                    key={index}
+                                    production={item}
+                                    onChangeProduction={newProduction =>
+                                        handleChangeProduction(
+                                            newProduction,
+                                            index
+                                        )
+                                    }
+                                    onDeleteProduction={() =>
+                                        handleDeleteProduction(index)
+                                    }
+                                />
+                                <Divider />
                             </>
                         ))}
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            onClick={handleAddProduction}>
+                            +
+                        </Button>
                     </Stack>
                 </Stack>
             </Box>
@@ -50,36 +130,56 @@ const SyntaxInputSection = () => {
                     zIndex: theme => theme.zIndex.drawer - 3
                 }}>
                 <Stack direction="row" justifyContent="end">
-                    <Button variant="contained">分析</Button>
+                    <Button variant="contained" onClick={handleAnalyse}>
+                        分析
+                    </Button>
                 </Stack>
             </Box>
         </>
     );
 };
 
-const ProducerBlock = () => {
+interface ProducerBlockProps {
+    production: LR0Production;
+    onChangeProduction: (newProduction: LR0Production) => void;
+    onDeleteProduction: () => void;
+}
+
+const ProducerBlock = (props: ProducerBlockProps) => {
+    const { production, onChangeProduction, onDeleteProduction } = props;
+    const { rightSide } = production;
+
     const [blockFocus, setBlockFocus] = useState(false);
-    const [producerRightSides, setProducerRightSides] = useState(["", ""]);
+    // const [producerRightSides, setProducerRightSides] = useState([""]);
+
+    const handleChangeRightSide = (newRightside: string[]) => {
+        onChangeProduction({
+            ...production,
+            rightSide: newRightside
+        });
+    };
+
     const handleChangeProducerRightSidesValue = (
         newValue: string,
         newValueIndex: number
     ) => {
-        setProducerRightSides(current =>
-            current.map((item, index) => {
-                if (index === newValueIndex) {
-                    return newValue;
-                } else return item;
-            })
-        );
+        const newRightSide = rightSide.map((item, index) => {
+            if (index === newValueIndex) {
+                return newValue;
+            } else return item;
+        });
+        handleChangeRightSide(newRightSide);
     };
 
     const handleAddRightSide = () => {
-        setProducerRightSides(current => [...current, ""]);
+        const newRightSide = [...rightSide, ""];
+        handleChangeRightSide(newRightSide);
     };
     const handleRemoveRightSide = (itemIndex: number) => {
-        setProducerRightSides(current =>
-            current.filter((item, index) => index !== itemIndex)
+        const newRightSide = rightSide.filter(
+            (item, index) => index !== itemIndex
         );
+        handleChangeRightSide(newRightSide);
     };
 
     return (
@@ -88,6 +188,7 @@ const ProducerBlock = () => {
             onFocus={() => setBlockFocus(true)}
             onBlur={() => setBlockFocus(false)}
             sx={{
+                position: "relative",
                 ":focus": {
                     outline: "none"
                 }
@@ -102,10 +203,10 @@ const ProducerBlock = () => {
                             <Stack
                                 sx={{ flex: 1, width: 0 }}
                                 alignItems="center">
-                                <ArrowForwardIcon />
+                                <ArrowDownwardIcon />
                             </Stack>
                         </Stack>
-                        {producerRightSides.map((producerRightSide, index) => (
+                        {rightSide.map((producerRightSide, index) => (
                             <SyntaxInputTextField
                                 key={index}
                                 value={producerRightSide}
@@ -146,6 +247,16 @@ const ProducerBlock = () => {
                     </Collapse>
                 </Stack>
             </Stack>
+            <IconButton
+                onClick={onDeleteProduction}
+                sx={{
+                    position: "absolute",
+                    top: "-1.8rem",
+                    right: 0,
+                    padding: 0
+                }}>
+                <ClearIcon />
+            </IconButton>
         </Box>
     );
 };
