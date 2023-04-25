@@ -116,7 +116,7 @@ const AnalysisTable = function (props: AnalysisTableProps) {
                     </TableHead>
                     <TableBody
                         sx={{
-                            "& .MuiTableRow-root .MuiTableCell-root:first-child":
+                            "& .MuiTableRow-root .MuiTableCell-root:first-of-type":
                                 {
                                     position: "sticky",
                                     left: 0,
