@@ -17,20 +17,47 @@ import { styled } from "@mui/material/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
+import { AnalyseLR0Grammar } from "../../../../modules/automatons/lr0/LR0";
 import {
     LR0Grammar,
     LR0Production
 } from "../../../../modules/automatons/lr0/LR0";
 
+const exampleGrammar1: LR0Grammar = {
+    productions: [
+        {
+            leftSide: "expr",
+            rightSide: ["expr + term", "expr - term", "term"]
+        },
+        {
+            leftSide: "term",
+            rightSide: ["term * factor", "term - factor", "factor"]
+        },
+        {
+            leftSide: "factor",
+            rightSide: ["( expr )", "num"]
+        }
+    ]
+};
+const exampleGrammar2: LR0Grammar = {
+    productions: [
+        {
+            leftSide: "S",
+            rightSide: ["B B"]
+        },
+        {
+            leftSide: "B",
+            rightSide: ["a B"]
+        },
+        {
+            leftSide: "B",
+            rightSide: ["b"]
+        }
+    ]
+};
+
 const SyntaxInputSection = () => {
-    const [grammar, setGrammar] = useState<LR0Grammar>({
-        productions: [
-            {
-                leftSide: "",
-                rightSide: [""]
-            }
-        ]
-    });
+    const [grammar, setGrammar] = useState<LR0Grammar>(exampleGrammar2);
 
     const handleChangeProduction = (
         newProduction: LR0Production,
@@ -77,7 +104,7 @@ const SyntaxInputSection = () => {
     };
 
     const handleAnalyse = () => {
-        console.log(grammar);
+        AnalyseLR0Grammar(grammar);
     };
 
     return (
@@ -147,7 +174,7 @@ interface ProducerBlockProps {
 
 const ProducerBlock = (props: ProducerBlockProps) => {
     const { production, onChangeProduction, onDeleteProduction } = props;
-    const { rightSide } = production;
+    const { leftSide, rightSide } = production;
 
     const [blockFocus, setBlockFocus] = useState(false);
     // const [producerRightSides, setProducerRightSides] = useState([""]);
@@ -182,6 +209,13 @@ const ProducerBlock = (props: ProducerBlockProps) => {
         handleChangeRightSide(newRightSide);
     };
 
+    const handleChangeLeftSide = (newLeftSide: string) => {
+        onChangeProduction({
+            ...production,
+            leftSide: newLeftSide
+        });
+    };
+
     return (
         <Box
             tabIndex={0}
@@ -198,7 +232,12 @@ const ProducerBlock = (props: ProducerBlockProps) => {
                     <Stack spacing={"0.8rem"}>
                         <Stack alignItems="center" direction="row">
                             <Box sx={{ flex: 1, width: 0 }}>
-                                <SyntaxInputTextField />
+                                <SyntaxInputTextField
+                                    value={leftSide}
+                                    onChange={e =>
+                                        handleChangeLeftSide(e.target.value)
+                                    }
+                                />
                             </Box>
                             <Stack
                                 sx={{ flex: 1, width: 0 }}
