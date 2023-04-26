@@ -4,6 +4,13 @@ import { fileURLToPath, URL } from "url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: "/syntactic-parsing-playground",
+    build: {
+        outDir: "./docs"
+    },
+    server: {
+        host: true
+    },
     plugins: [react()],
     resolve: {
         alias: [
