@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && touch docs/.nojekyll",
-    "preview": "vite preview"
+    "build": "tsc && vite build && touch dist/.nojekyll",
+    "preview": "vite preview",
+    "deploy": "./scripts/deploy.bat"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
