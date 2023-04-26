@@ -19,11 +19,11 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AnalyseLR0Grammar } from "../../../../modules/automatons/lr0/LR0";
 import {
-    LR0Grammar,
+    LR0RawGrammar,
     LR0Production
 } from "../../../../modules/automatons/lr0/LR0";
 
-const exampleGrammar1: LR0Grammar = {
+const exampleGrammar1: LR0RawGrammar = {
     productions: [
         {
             leftSide: "expr",
@@ -39,7 +39,7 @@ const exampleGrammar1: LR0Grammar = {
         }
     ]
 };
-const exampleGrammar2: LR0Grammar = {
+const exampleGrammar2: LR0RawGrammar = {
     productions: [
         {
             leftSide: "S",
@@ -57,7 +57,7 @@ const exampleGrammar2: LR0Grammar = {
 };
 
 const SyntaxInputSection = () => {
-    const [grammar, setGrammar] = useState<LR0Grammar>(exampleGrammar2);
+    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar2);
 
     const handleChangeProduction = (
         newProduction: LR0Production,

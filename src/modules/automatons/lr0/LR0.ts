@@ -8,7 +8,7 @@ interface LR0GrammarBase {
     productions: LR0Production[];
 }
 
-export interface LR0Grammar extends LR0GrammarBase {}
+export interface LR0RawGrammar extends LR0GrammarBase {}
 
 export interface LR0StandardGrammar extends LR0GrammarBase {
     startCharacter: string;
@@ -20,10 +20,13 @@ export interface LR0Item extends LR0Production {
     dotPos: number;
 }
 
-export interface LR0AutomatonState {
+interface LR0AutomatonStateBase {
     id: number;
+    targets: { id: number; transferSymbols: string[] }[];
+}
+
+export interface LR0AutomatonState extends LR0AutomatonStateBase {
     itemSet: LR0Item[];
-    targets: { id: number; transferCharacters: string[] }[];
 }
 
 export interface LR0Automaton {
@@ -46,7 +49,7 @@ const getItemNextSymbole = (item: LR0Item) => {
     );
 };
 
-const rawGrammarToStandardGrammar = (rawGrammar: LR0Grammar) => {
+const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
     const { productions } = rawGrammar;
 
     const rawNonTerminals = productions.map(production => production.leftSide);
@@ -164,7 +167,7 @@ const LR0Goto = (
     return LR0Closure(targetItemSet, standardGrammar);
 };
 
-const LR0Items = (standardGrammar: LR0StandardGrammar) => {
+const LR0States = (standardGrammar: LR0StandardGrammar) => {
     const { nonTerminals, terminals } = standardGrammar;
 
     const initItemSet: LR0Item[] = [
@@ -175,6 +178,7 @@ const LR0Items = (standardGrammar: LR0StandardGrammar) => {
     ];
 
     let currentStates: LR0Item[][] = [LR0Closure(initItemSet, standardGrammar)];
+    let graph: LR0AutomatonStateBase[] = [{ id: 0, targets: [] }];
     const symbols = [...nonTerminals, ...terminals];
 
     const itemSetEqual = (a: LR0Item[], b: LR0Item[]) => {
@@ -191,16 +195,45 @@ const LR0Items = (standardGrammar: LR0StandardGrammar) => {
     while (true) {
         const newStates = [...currentStates];
 
-        currentStates.forEach(itemSet => {
+        currentStates.forEach((itemSet, currentItemSetIndex) => {
             symbols.forEach(symbol => {
                 const newItemSet = LR0Goto(itemSet, symbol, standardGrammar);
-                if (
-                    newItemSet.length !== 0 &&
-                    newStates.findIndex(state =>
+
+                if (newItemSet.length !== 0) {
+                    const newItemSetIndex = newStates.findIndex(state =>
                         itemSetEqual(state, newItemSet)
-                    ) === -1
-                ) {
-                    newStates.push(newItemSet);
+                    );
+                    if (newItemSetIndex === -1) {
+                        const newId = newStates.length;
+                        newStates.push(newItemSet);
+                        graph.push({ id: newId, targets: [] });
+
+                        graph[currentItemSetIndex].targets.push({
+                            id: newId,
+                            transferSymbols: [symbol]
+                        });
+                    } else {
+                        const targetId = newItemSetIndex;
+                        const linkIndex = graph[
+                            currentItemSetIndex
+                        ].targets.findIndex(target => target.id === targetId);
+
+                        if (linkIndex === -1) {
+                            graph[currentItemSetIndex].targets.push({
+                                id: targetId,
+                                transferSymbols: [symbol]
+                            });
+                        } else {
+                            graph[currentItemSetIndex].targets[
+                                linkIndex
+                            ].transferSymbols.findIndex(
+                                transferSymbol => transferSymbol === symbol
+                            ) === -1 &&
+                                graph[currentItemSetIndex].targets[
+                                    linkIndex
+                                ].transferSymbols.push(symbol);
+                        }
+                    }
                 }
             });
         });
@@ -209,11 +242,27 @@ const LR0Items = (standardGrammar: LR0StandardGrammar) => {
         currentStates = newStates;
     }
 
-    return currentStates;
+    let automatonStates: LR0AutomatonState[] = [];
+
+    currentStates.forEach((state, index) => {
+        automatonStates = [
+            ...automatonStates,
+            {
+                id: graph[index].id,
+                itemSet: state,
+                targets: graph[index].targets.map(target => ({
+                    id: target.id,
+                    transferSymbols: [...target.transferSymbols]
+                }))
+            }
+        ];
+    });
+
+    return automatonStates;
 };
 
 export const AnalyseLR0Grammar: (
-    grammar: LR0Grammar
+    grammar: LR0RawGrammar
 ) => LR0Automaton = grammar => {
     const automaton: LR0Automaton = {
         states: []
@@ -221,14 +270,8 @@ export const AnalyseLR0Grammar: (
 
     const standarGrammar = rawGrammarToStandardGrammar(grammar);
 
-    console.log(LR0Items(standarGrammar));
-
-    // console.log("standard grammar", standarGrammar);
-
-    // console.log(state0);
-    // const state1 = LR0Goto(state0, "B", standarGrammar);
-    // console.log(state1);
-
+    automaton.states = LR0States(standarGrammar);
+    console.log(automaton);
     return automaton;
 };
 
