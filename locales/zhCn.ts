@@ -1,5 +1,5 @@
-const localeZhCn = {
-  APP_TITLE: "Syntactic Parsing Playground",
+const zhCn = {
+    APP_TITLE: "Syntactic Parsing Playground"
 };
 
-export default localeZhCn;
+export default zhCn;
