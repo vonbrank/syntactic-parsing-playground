@@ -10,6 +10,7 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 // import ReactDOM from "react-dom/client";
 import ReactDOM from "react-dom";
 import * as d3 from "d3";
+import { LR0AutomatonState } from "../../../../modules/automatons/lr0/LR0";
 
 interface AutomatonState {
     id: string;
@@ -104,7 +105,7 @@ export const exampleAutomaton: AutomatonState[] = [
 ];
 
 interface AutomatonGraphProps {
-    automatonStates: AutomatonState[];
+    automatonStates: LR0AutomatonState[];
 }
 
 interface AutomatonGraphInfo {
@@ -136,17 +137,26 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
     const automatonGraphInfoRef = useRef<AutomatonGraphInfo>({
         graph: {
             nodes: automatonStates.map(state => ({
-                id: state.id,
-                itemSets: [...state.itemSets]
+                id: `${state.id}`,
+                itemSets: state.itemSet.map(item => {
+                    let res = `${item.leftSide} → `;
+
+                    if (item.dotPos > 0) {
+                        res = `${res}${item.rightSide.slice(0, item.dotPos)}`;
+                    }
+                    res = `${res}·`;
+                    if (item.dotPos < item.rightSide.length) {
+                        res = `${res}${item.rightSide.slice(item.dotPos)}`;
+                    }
+                    return res;
+                })
             })),
             links: automatonStates.reduce((acc, state) => {
-                const currentLinks: d3Link[] = state.transfers.map(
-                    transfer => ({
-                        target: transfer.targetId,
-                        source: state.id,
-                        character: transfer.character
-                    })
-                );
+                const currentLinks: d3Link[] = state.targets.map(target => ({
+                    target: `${target.id}`,
+                    source: `${state.id}`,
+                    character: target.transferSymbols.join("")
+                }));
                 return [...acc, ...currentLinks];
             }, [] as d3Link[])
         },
@@ -385,7 +395,8 @@ const Nodes = forwardRef<{
                         width: 128,
                         height: 192,
                         boxSizing: "border-box",
-                        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)"
+                        boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)",
+                        overflow: "auto"
                     }}
                     className="automaton-state-container"
                     id={node.id}

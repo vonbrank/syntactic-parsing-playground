@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import localeReducer from "./reducers/locale";
+import automatonSlice from "./reducers/automaton";
 
 const store = configureStore({
     reducer: {
-        locale: localeReducer
+        locale: localeReducer,
+        automaton: automatonSlice
     }
 });
 

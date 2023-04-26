@@ -18,10 +18,12 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AnalyseLR0Grammar } from "../../../../modules/automatons/lr0/LR0";
+import { useAppDispatch } from "../../../../store/hooks";
 import {
     LR0RawGrammar,
     LR0Production
 } from "../../../../modules/automatons/lr0/LR0";
+import { generateAutomaton } from "@/store/reducers/automaton";
 
 const exampleGrammar1: LR0RawGrammar = {
     productions: [
@@ -57,7 +59,9 @@ const exampleGrammar2: LR0RawGrammar = {
 };
 
 const SyntaxInputSection = () => {
-    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar2);
+    const disptach = useAppDispatch();
+
+    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar1);
 
     const handleChangeProduction = (
         newProduction: LR0Production,
@@ -104,7 +108,8 @@ const SyntaxInputSection = () => {
     };
 
     const handleAnalyse = () => {
-        AnalyseLR0Grammar(grammar);
+        disptach(generateAutomaton(grammar));
+        // AnalyseLR0Grammar(grammar);
     };
 
     return (
