@@ -1,10 +1,11 @@
 .divSentenceEditorWrapper {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
+    width: 600px;
+    height: 24rem;
+    max-height: 24rem;
     position: relative;
     font-size: 15px;
     line-height: 20px;
+    letter-spacing: 0.001em;
     display: flex;
     overflow-y: auto;
 }
@@ -52,8 +53,13 @@
 }
 
 .divLockedSentenceWrapper{
-    display: flex;
-    flex-wrap: wrap;
+    position: relative;
+    top: 0;
+    width: 100%;
+    min-height: calc(100% - 4px);
+    
+    white-space: pre;
+    overflow-y: hidden;
 }
 
 .spanConsumedChar {

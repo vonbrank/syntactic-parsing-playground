@@ -1,5 +1,4 @@
 import React from "react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import styles from "./SentenceEditor.module.scss";
 import { splitLines } from "@/modules/utils";
 
@@ -39,7 +38,7 @@ const SentenceEditor: React.FC<SentenceEditorProps> = (
                                 </span>
                             ))}
                         {props.sentence
-                            .substring(props.lastConsumedIndex)
+                            .substring(props.lastConsumedIndex + 1)
                             .split("")
                             .map((x, i) => (
                                 <span
