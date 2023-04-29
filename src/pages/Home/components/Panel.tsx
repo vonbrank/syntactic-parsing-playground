@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { IconButton, Tabs, Tab, StackProps } from "@mui/material";
+import { IconButton, Tabs, Tab, StackProps, Checkbox } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
 import AnalysisTable from "./AnalysisTable";
 import SyntaxInputSection from "./SyntaxInputSection";
+import SentenceEditor from "./SentenceEditor/SentenceEditor";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -97,6 +98,10 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
         justifyContent = "center",
         ...others
     } = props;
+
+    const [isLocked, setIsLocked] = useState(false);
+    const [demoSentence, setDemoSentence] = useState("");
+
     return (
         <Stack
             height={bottomDrawerHeight}
@@ -109,7 +114,20 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                 sx={{ position: "absolute", top: 0, right: 0 }}>
                 <CloseIcon />
             </IconButton>
-            <Typography>输入句子与分析格局区域占位符</Typography>
+
+            <Stack direction="row">
+                <Checkbox
+                    onChange={e => setIsLocked(e.currentTarget.checked)}
+                />
+                <Typography>
+                    <SentenceEditor
+                        isLocked={isLocked}
+                        sentence={demoSentence}
+                        onSentenceChange={e => setDemoSentence(e)}
+                        lastConsumedIndex={7}
+                    />
+                </Typography>
+            </Stack>
         </Stack>
     );
 };
