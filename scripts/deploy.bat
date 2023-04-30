@@ -18,7 +18,7 @@ cd "%DEPLOY_DIR%"
 git init
 git add .
 git commit -m "Site deployed: %timestamp%"
-git remote add origin git@github.com:vonbrank/Syntactic-Parsing-Playground.git
+git remote add origin git@github.com:vonbrank/syntactic-parsing-playground.git
 git branch -M gh-page
 git push -f origin gh-page:gh-page
 
