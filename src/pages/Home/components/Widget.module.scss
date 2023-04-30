@@ -10,10 +10,9 @@
         display: flex;
         flex-direction: row;
 
-        &
-            :global(.MuiCollapse-root):not(:last-of-type)
-            :global(.MuiCollapse-wrapperInner) {
-            margin-right: 0.8rem;
+        & :global(.MuiCollapse-wrapperInner) {
+            margin-left: 0.4rem;
+            margin-right: 0.4rem;
         }
     }
 }

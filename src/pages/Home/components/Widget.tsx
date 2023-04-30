@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     IconButton,
     useTheme,
     Stack,
     Paper,
-    Collapse
+    Collapse,
+    Grow
 } from "@mui/material";
 import { getTransitionMarginByBottomDrawer } from "./Container";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -16,19 +17,41 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import { TransitionGroup } from "react-transition-group";
 import styles from "./Widget.module.scss";
-import { useAppSelector } from "../../../store/hooks";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import {
-    LR0AnalysingPattern,
-    ReduceLR0AnalysingPattern
-} from "@/modules/automatons/lr0";
+    startAnalysingSentence,
+    stopAnalysingSentence,
+    updateAnalysingPattern
+} from "@/store/reducers/automaton";
 
 interface AnalysisControlWidgetProps {
     bottomDrawerOpen: boolean;
     bottomDrawerHeight: string;
 }
 
+export type UpdateAnalysingPatternOption =
+    | "RESTART"
+    | "PREVIOUS"
+    | "NEXT"
+    | "FINAL";
+
+const labelToButtonIcon = {
+    Play: <PlayArrowIcon />,
+    Stop: <StopIcon />,
+    Previous: <SkipPreviousIcon />,
+    Next: <SkipNextIcon />,
+    "Fast Forward": <FastForwardIcon />,
+    Restart: <RestartAltIcon />
+};
+
+type ActionLabel = keyof typeof labelToButtonIcon;
+
 export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
     const { bottomDrawerHeight, bottomDrawerOpen } = props;
+    const dispatch = useAppDispatch();
+    const { automaton } = useAppSelector(state => ({
+        automaton: state.automaton.automaton
+    }));
     const theme = useTheme();
     const [transition, marginBottom] = getTransitionMarginByBottomDrawer(
         theme,
@@ -37,71 +60,48 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
     );
     const [mode, setMode] = useState<"Playing" | "Idle">("Idle");
 
-    const { automaton } = useAppSelector(state => ({
-        automaton: state.automaton.automaton
-    }));
-
-    const [currentPattern, setCurrentPattern] =
-        useState<LR0AnalysingPattern | null>(null);
-
     const onStartAnalysing = () => {
-        if (automaton === null) return;
-
-        console.log("automaton = ", automaton);
-
-        setCurrentPattern({
-            currentStepIndex: 0,
-            stateStack: [0],
-            characterStack: ["$"],
-            remainCharacters: ["b", "a", "b", "$"],
-            initialSentence: "bab"
-        });
+        setMode("Playing");
+        dispatch(startAnalysingSentence());
+    };
+    const onStopAnalysing = () => {
+        setMode("Idle");
+        dispatch(stopAnalysingSentence());
     };
 
     const handleAnalyseNextStep = () => {
-        if (automaton === null) return;
-        setCurrentPattern(current => {
-            if (current !== null) {
-                const newPattern = ReduceLR0AnalysingPattern(
-                    current,
-                    automaton,
-                    1
-                );
-                console.log("new pattern = ", newPattern);
-                return newPattern;
-            }
-            return current;
-        });
+        dispatch(updateAnalysingPattern("NEXT"));
     };
 
-    const idleGroup = [
-        <IconButton
-            onClick={() => {
-                setMode("Playing");
-                onStartAnalysing();
-            }}>
-            <PlayArrowIcon />
-        </IconButton>
-    ];
-    const playingGroup = [
-        <IconButton onClick={() => setMode("Idle")}>
-            <StopIcon />
-        </IconButton>,
-        <IconButton>
-            <RestartAltIcon />
-        </IconButton>,
-        <IconButton>
-            <SkipPreviousIcon />
-        </IconButton>,
-        <IconButton onClick={handleAnalyseNextStep}>
-            <SkipNextIcon />
-        </IconButton>,
-        <IconButton>
-            <FastForwardIcon />
-        </IconButton>
-    ];
+    const [currentGroup, setCurrentGroup] = useState<ActionLabel[]>([]);
 
-    const currentGroup = mode === "Idle" ? idleGroup : playingGroup;
+    useEffect(() => {
+        setCurrentGroup(() => {
+            if (mode === "Idle") {
+                return ["Play"];
+            }
+            return ["Stop", "Restart", "Previous", "Next", "Fast Forward"];
+        });
+    }, [mode]);
+
+    useEffect(() => {
+        setMode("Idle");
+    }, [automaton]);
+
+    const handleAction = (actionLabel: ActionLabel) => {
+        switch (actionLabel) {
+            case "Play":
+                onStartAnalysing();
+                break;
+            case "Stop":
+                onStopAnalysing();
+                break;
+            case "Next":
+                handleAnalyseNextStep();
+                break;
+            default:
+        }
+    };
 
     return (
         <Box className={styles["AnalysisControlWidget-root"]}>
@@ -111,20 +111,29 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
                     transition: transition,
                     marginBottom: `calc(${marginBottom} + 2.4rem)`
                 }}>
-                <Paper>
-                    <Box>
-                        <TransitionGroup
-                            className={
-                                styles["AnalysisControlWidget-transition-group"]
-                            }>
-                            {currentGroup.map((item, index) => (
-                                <Collapse key={index} orientation="horizontal">
-                                    {item}
-                                </Collapse>
-                            ))}
-                        </TransitionGroup>
-                    </Box>
-                </Paper>
+                <Grow in={automaton !== null}>
+                    <Paper>
+                        <Box>
+                            <TransitionGroup
+                                className={
+                                    styles[
+                                        "AnalysisControlWidget-transition-group"
+                                    ]
+                                }>
+                                {currentGroup.map((item, index) => (
+                                    <Collapse
+                                        key={item}
+                                        orientation="horizontal">
+                                        <IconButton
+                                            onClick={() => handleAction(item)}>
+                                            {labelToButtonIcon[item]}
+                                        </IconButton>
+                                    </Collapse>
+                                ))}
+                            </TransitionGroup>
+                        </Box>
+                    </Paper>
+                </Grow>
             </Box>
         </Box>
     );

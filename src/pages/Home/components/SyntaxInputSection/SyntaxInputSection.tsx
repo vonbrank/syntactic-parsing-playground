@@ -23,8 +23,13 @@ import {
     LR0RawGrammar,
     LR0Production
 } from "../../../../modules/automatons/lr0/LR0";
-import { generateAutomaton } from "@/store/reducers/automaton";
+import {
+    disposeAutomaton,
+    generateAutomaton
+} from "@/store/reducers/automaton";
 import { TransitionGroup } from "react-transition-group";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 const exampleGrammar1: LR0RawGrammar = {
     productions: [
@@ -108,9 +113,14 @@ const SyntaxInputSection = () => {
         });
     };
 
-    const handleAnalyse = () => {
-        disptach(generateAutomaton(grammar));
-        // AnalyseLR0Grammar(grammar);
+    const [analysingLaunched, setAnalysingLaunched] = useState(false);
+
+    const switchAnalysingState = () => {
+        setAnalysingLaunched(current => {
+            if (current) disptach(disposeAutomaton());
+            else disptach(generateAutomaton(grammar));
+            return !current;
+        });
     };
 
     return (
@@ -179,9 +189,15 @@ const SyntaxInputSection = () => {
                     zIndex: theme => theme.zIndex.drawer - 3
                 }}>
                 <Stack direction="row" justifyContent="end">
-                    <Button variant="contained" onClick={handleAnalyse}>
-                        分析
-                    </Button>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={analysingLaunched}
+                                onChange={switchAnalysingState}
+                            />
+                        }
+                        label="分析"
+                    />
                 </Stack>
             </Box>
         </>

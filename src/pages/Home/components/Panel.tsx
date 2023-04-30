@@ -16,6 +16,8 @@ import AnalysisTable from "./AnalysisTable";
 import SyntaxInputSection from "./SyntaxInputSection";
 import SentenceEditor from "./SentenceEditor/SentenceEditor";
 import { Sentence } from "./SentenceEditor/SentenceEditor";
+import { useAppSelector, useAppDispatch } from "../../../store/hooks";
+import { updateInputSentence } from "@/store/reducers/automaton";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -108,12 +110,26 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
         ...others
     } = props;
 
-    const [isLocked, setIsLocked] = useState(false);
-    const [demoSentence, setDemoSentence] = useState<Sentence>({
-        data: "",
-        selectionStart: 0,
-        selectionEnd: 0
-    });
+    const { inputSentence, currentPattern } = useAppSelector(state => ({
+        inputSentence: state.automaton.inputSentence,
+        currentPattern: state.automaton.currentPattern
+    }));
+    const disptach = useAppDispatch();
+
+    const handleChangeSentence = (newValue: Sentence) => {
+        disptach(updateInputSentence(newValue));
+    };
+
+    const getLastConsumedIndex = () => {
+        // console.log("currentPattern = ", currentPattern);
+        if (currentPattern === null) return -1;
+
+        return (
+            currentPattern.initialSentence.length -
+            currentPattern.remainCharacters.length -
+            1
+        );
+    };
 
     return (
         <Stack
@@ -134,15 +150,15 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
             </IconButton>
 
             <Stack direction="row">
-                <Checkbox
+                {/* <Checkbox
                     onChange={e => setIsLocked(e.currentTarget.checked)}
-                />
+                /> */}
                 <Typography>
                     <SentenceEditor
-                        isLocked={isLocked}
-                        sentence={demoSentence}
-                        onSentenceChange={e => setDemoSentence(e)}
-                        lastConsumedIndex={7}
+                        isLocked={currentPattern !== null}
+                        sentence={inputSentence}
+                        onSentenceChange={handleChangeSentence}
+                        lastConsumedIndex={getLastConsumedIndex()}
                     />
                 </Typography>
             </Stack>
