@@ -91,6 +91,7 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
     const handleAction = (actionLabel: ActionLabel) => {
         switch (actionLabel) {
             case "Play":
+            case "Restart":
                 onStartAnalysing();
                 break;
             case "Stop":

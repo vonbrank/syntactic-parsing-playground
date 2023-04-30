@@ -198,15 +198,15 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                                     theme.palette.background.default
                             }}
                             alignItems="center">
-                            <Typography fontSize={"3rem"}>状态栈</Typography>
+                            <Typography fontSize={"2rem"}>状态栈</Typography>
                         </Stack>
                         {analysingStack.stateStack.map((state, index) => (
                             <Grow key={`${state}-${index}`}>
                                 <Stack
-                                    width={"9.6rem"}
+                                    width={"6.4rem"}
                                     alignItems="center"
                                     sx={{ flexShrink: 0 }}>
-                                    <Typography fontSize={"3rem"}>
+                                    <Typography fontSize={"2rem"}>
                                         {state === -1 ? "" : state}
                                     </Typography>
                                 </Stack>
@@ -235,16 +235,16 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                                     theme.palette.background.default
                             }}
                             alignItems="center">
-                            <Typography fontSize={"3rem"}>符号栈</Typography>
+                            <Typography fontSize={"2rem"}>符号栈</Typography>
                         </Stack>
                         {analysingStack.characterStack.map(
                             (character, index) => (
                                 <Grow key={`${character}-${index}`}>
                                     <Stack
-                                        width={"9.6rem"}
+                                        width={"6.4rem"}
                                         alignItems="center"
                                         sx={{ flexShrink: 0 }}>
-                                        <Typography fontSize={"3rem"}>
+                                        <Typography fontSize={"2rem"}>
                                             {character}
                                         </Typography>
                                     </Stack>
