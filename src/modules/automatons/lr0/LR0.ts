@@ -34,6 +34,7 @@ export interface LR0Automaton {
     startId: number;
     endId: number;
     states: LR0AutomatonState[];
+    standardGrammar: LR0StandardGrammar;
 }
 
 export interface LR0AnalysingPattern {
@@ -266,14 +267,14 @@ const LR0States = (standardGrammar: LR0StandardGrammar) => {
 export const AnalyseLR0Grammar: (
     grammar: LR0RawGrammar
 ) => LR0Automaton = grammar => {
-    const standarGrammar = rawGrammarToStandardGrammar(grammar);
+    const standardGrammar = rawGrammarToStandardGrammar(grammar);
 
-    const states = LR0States(standarGrammar);
+    const states = LR0States(standardGrammar);
     let startId = -1;
     let endId = -1;
     states.forEach(state => {
         state.itemSet.forEach(item => {
-            if (item.leftSide === standarGrammar.startCharacter) {
+            if (item.leftSide === standardGrammar.startCharacter) {
                 if (item.dotPos === 0) {
                     startId = state.id;
                 } else if (item.dotPos === 1) {
@@ -285,10 +286,11 @@ export const AnalyseLR0Grammar: (
     const automaton: LR0Automaton = {
         states,
         startId,
-        endId
+        endId,
+        standardGrammar
     };
 
-    console.log(automaton);
+    // console.log(automaton);
     return automaton;
 };
 

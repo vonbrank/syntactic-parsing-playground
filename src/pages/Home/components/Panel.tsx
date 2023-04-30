@@ -90,10 +90,14 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
 interface AnalysisTablePanelProps {}
 
 export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
+    const { automaton } = useAppSelector(state => ({
+        automaton: state.automaton.automaton
+    }));
+
     return (
         <Stack width={"32rem"}>
             <Stack height={"100%"} alignItems="center">
-                <AnalysisTable />
+                <AnalysisTable automaton={automaton} />
             </Stack>
         </Stack>
     );

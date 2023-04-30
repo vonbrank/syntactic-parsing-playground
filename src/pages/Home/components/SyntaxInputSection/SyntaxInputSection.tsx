@@ -18,7 +18,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
 import { AnalyseLR0Grammar } from "../../../../modules/automatons/lr0/LR0";
-import { useAppDispatch } from "../../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import {
     LR0RawGrammar,
     LR0Production
@@ -63,9 +63,28 @@ const exampleGrammar2: LR0RawGrammar = {
         }
     ]
 };
+const exampleGrammar3: LR0RawGrammar = {
+    productions: [
+        {
+            leftSide: "E",
+            rightSide: ["E + T", "T"]
+        },
+        {
+            leftSide: "T",
+            rightSide: ["T * F", "F"]
+        },
+        {
+            leftSide: "F",
+            rightSide: ["( E )", "id"]
+        }
+    ]
+};
 
 const SyntaxInputSection = () => {
     const disptach = useAppDispatch();
+    const { automaton } = useAppSelector(state => ({
+        automaton: state.automaton.automaton
+    }));
 
     const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar2);
 
@@ -130,48 +149,73 @@ const SyntaxInputSection = () => {
                     在此输入文法
                 </Typography>
                 <Stack>
-                    <Stack
-                        sx={{
-                            "& .SyntaxInputSection-transition-group": {
-                                "& .SyntaxInputSection-transition-group-collapse-root:not(:first-of-type) .ProducerBlock-root":
-                                    {
-                                        marginTop: "2rem"
-                                    },
-                                "& .SyntaxInputSection-transition-group-collapse-root:not(:last-of-type) .ProducerBlock-root":
-                                    {
-                                        marginBottom: "2rem"
-                                    }
-                            }
-                        }}
-                        spacing="2rem">
-                        <TransitionGroup className="SyntaxInputSection-transition-group">
-                            {grammar.productions.map((item, index) => (
-                                <Collapse className="SyntaxInputSection-transition-group-collapse-root">
-                                    <ProducerBlock
-                                        key={index}
-                                        production={item}
-                                        onChangeProduction={newProduction =>
-                                            handleChangeProduction(
-                                                newProduction,
-                                                index
-                                            )
+                    {automaton === null ? (
+                        <Stack
+                            sx={{
+                                "& .SyntaxInputSection-transition-group": {
+                                    "& .SyntaxInputSection-transition-group-collapse-root:not(:first-of-type) .ProducerBlock-root":
+                                        {
+                                            marginTop: "2rem"
+                                        },
+                                    "& .SyntaxInputSection-transition-group-collapse-root:not(:last-of-type) .ProducerBlock-root":
+                                        {
+                                            marginBottom: "2rem"
                                         }
-                                        onDeleteProduction={() =>
-                                            handleDeleteProduction(index)
-                                        }
-                                    />
-                                    <Divider />
-                                </Collapse>
-                            ))}
-                        </TransitionGroup>
+                                }
+                            }}
+                            spacing="2rem">
+                            <TransitionGroup className="SyntaxInputSection-transition-group">
+                                {grammar.productions.map((item, index) => (
+                                    <Collapse className="SyntaxInputSection-transition-group-collapse-root">
+                                        <ProducerBlock
+                                            key={index}
+                                            production={item}
+                                            onChangeProduction={newProduction =>
+                                                handleChangeProduction(
+                                                    newProduction,
+                                                    index
+                                                )
+                                            }
+                                            onDeleteProduction={() =>
+                                                handleDeleteProduction(index)
+                                            }
+                                        />
+                                        <Divider />
+                                    </Collapse>
+                                ))}
+                            </TransitionGroup>
 
-                        <Button
-                            variant="contained"
-                            fullWidth
-                            onClick={handleAddProduction}>
-                            +
-                        </Button>
-                    </Stack>
+                            <Button
+                                variant="contained"
+                                fullWidth
+                                onClick={handleAddProduction}>
+                                +
+                            </Button>
+                        </Stack>
+                    ) : (
+                        <Stack
+                            sx={{
+                                "& .MuiTypography-root": {
+                                    fontFamily: `"Roboto Mono", monospace`,
+                                    fontSize: "1.8rem"
+                                }
+                            }}>
+                            {automaton.standardGrammar.productions.map(
+                                (production, index) => {
+                                    if (index === 0) return <></>;
+                                    return (
+                                        <Stack direction={"row"} key={index}>
+                                            <Typography>{`(${index}) ${
+                                                production.leftSide
+                                            } ➜  ${production.rightSide.join(
+                                                " "
+                                            )}`}</Typography>
+                                        </Stack>
+                                    );
+                                }
+                            )}
+                        </Stack>
+                    )}
                 </Stack>
             </Box>
             <Box
