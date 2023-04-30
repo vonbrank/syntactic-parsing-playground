@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     IconButton,
     Tabs,
@@ -6,7 +6,8 @@ import {
     StackProps,
     Checkbox,
     Box,
-    Paper
+    Paper,
+    Grow
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
@@ -18,6 +19,9 @@ import SentenceEditor from "./SentenceEditor/SentenceEditor";
 import { Sentence } from "./SentenceEditor/SentenceEditor";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import { updateInputSentence } from "@/store/reducers/automaton";
+import { alpha } from "@mui/material/styles";
+import { TransitionGroup } from "react-transition-group";
+import Collapse from "@mui/material/Collapse";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -121,7 +125,6 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
     };
 
     const getLastConsumedIndex = () => {
-        // console.log("currentPattern = ", currentPattern);
         if (currentPattern === null) return -1;
 
         return (
@@ -131,13 +134,141 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
         );
     };
 
+    const [analysingStack, setAnalysingStack] = useState<{
+        stateStack: number[];
+        characterStack: string[];
+    }>({
+        stateStack: [],
+        characterStack: []
+    });
+
+    useEffect(() => {
+        if (currentPattern === null) {
+            setAnalysingStack({
+                stateStack: [],
+                characterStack: []
+            });
+        } else {
+            setAnalysingStack({
+                stateStack: [...currentPattern.stateStack],
+                characterStack: [...currentPattern.characterStack]
+            });
+        }
+    }, [currentPattern]);
+
     return (
         <Stack
             height={bottomDrawerHeight}
-            sx={{ position: "relative", ...(sx || {}) }}
-            alignItems={alignItems}
-            justifyContent={justifyContent}
+            sx={{
+                position: "relative",
+                "& .AnalysisPatternPanel-pattern-transition-group": {
+                    display: "flex",
+                    flexDirection: "row"
+                },
+                ...(sx || {})
+            }}
+            direction="row"
             {...others}>
+            <Stack
+                sx={{
+                    flex: 1,
+                    width: 0,
+                    overflowX: "auto",
+                    margin: "3.6rem",
+                    border: theme => `1px solid ${theme.palette.divider}`
+                }}>
+                <Stack
+                    sx={{
+                        flex: 1
+                    }}
+                    justifyContent={"start"}
+                    direction="row"
+                    alignItems={"center"}>
+                    <TransitionGroup
+                        className={
+                            "AnalysisPatternPanel-pattern-transition-group"
+                        }>
+                        <Stack
+                            width={"12.8rem"}
+                            sx={{
+                                flexShrink: 0,
+                                position: "sticky",
+                                left: 0,
+                                background: theme =>
+                                    theme.palette.background.default
+                            }}
+                            alignItems="center">
+                            <Typography fontSize={"3rem"}>状态栈</Typography>
+                        </Stack>
+                        {analysingStack.stateStack.map((state, index) => (
+                            <Grow key={`${state}-${index}`}>
+                                <Stack
+                                    width={"9.6rem"}
+                                    alignItems="center"
+                                    sx={{ flexShrink: 0 }}>
+                                    <Typography fontSize={"3rem"}>
+                                        {state === -1 ? "" : state}
+                                    </Typography>
+                                </Stack>
+                            </Grow>
+                        ))}
+                    </TransitionGroup>
+                </Stack>
+                <Stack
+                    sx={{
+                        flex: 1
+                    }}
+                    justifyContent={"start"}
+                    direction="row"
+                    alignItems={"center"}>
+                    <TransitionGroup
+                        className={
+                            "AnalysisPatternPanel-pattern-transition-group"
+                        }>
+                        <Stack
+                            width={"12.8rem"}
+                            sx={{
+                                flexShrink: 0,
+                                position: "sticky",
+                                left: 0,
+                                background: theme =>
+                                    theme.palette.background.default
+                            }}
+                            alignItems="center">
+                            <Typography fontSize={"3rem"}>符号栈</Typography>
+                        </Stack>
+                        {analysingStack.characterStack.map(
+                            (character, index) => (
+                                <Grow key={`${character}-${index}`}>
+                                    <Stack
+                                        width={"9.6rem"}
+                                        alignItems="center"
+                                        sx={{ flexShrink: 0 }}>
+                                        <Typography fontSize={"3rem"}>
+                                            {character}
+                                        </Typography>
+                                    </Stack>
+                                </Grow>
+                            )
+                        )}
+                    </TransitionGroup>
+                </Stack>
+            </Stack>
+            <Stack
+                direction="row"
+                sx={{
+                    flex: 1,
+                    borderLeft: theme => `2px solid ${theme.palette.divider}`
+                }}>
+                <Typography>
+                    <SentenceEditor
+                        isLocked={currentPattern !== null}
+                        sentence={inputSentence}
+                        onSentenceChange={handleChangeSentence}
+                        lastConsumedIndex={getLastConsumedIndex()}
+                    />
+                </Typography>
+            </Stack>
             <IconButton
                 onClick={() => setBottomDrawerOpen(false)}
                 sx={{
@@ -148,20 +279,6 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                 }}>
                 <CloseIcon />
             </IconButton>
-
-            <Stack direction="row">
-                {/* <Checkbox
-                    onChange={e => setIsLocked(e.currentTarget.checked)}
-                /> */}
-                <Typography>
-                    <SentenceEditor
-                        isLocked={currentPattern !== null}
-                        sentence={inputSentence}
-                        onSentenceChange={handleChangeSentence}
-                        lastConsumedIndex={getLastConsumedIndex()}
-                    />
-                </Typography>
-            </Stack>
         </Stack>
     );
 };
