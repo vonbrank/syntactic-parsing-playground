@@ -52,20 +52,20 @@
     background-color: transparent;
 }
 
-.divLockedSentenceWrapper{
+.divLockedSentenceWrapper {
     position: relative;
     top: 0;
     width: 100%;
     min-height: calc(100% - 4px);
-    
+
     white-space: pre;
     overflow-y: hidden;
 }
 
 .spanConsumedChar {
-    color: blue;
+    color: #9e9e9e;
 }
 
 .spanUnconsumedChar {
-    color: black;
+    color: #212121;
 }

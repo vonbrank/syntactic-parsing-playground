@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import styles from "./SentenceEditor.module.scss";
 import { splitLines } from "@/modules/utils";
+import { alpha, Box } from "@mui/material";
 import { sleep } from "@/utils";
 
 export interface Sentence {
@@ -107,14 +108,14 @@ const SentenceEditor: React.FC<SentenceEditorProps> = (
     };
 
     return (
-        <div className={styles.divSentenceEditorWrapper}>
-            <div className={styles.divLineNumberWrapper}>
+        <Box className={styles.divSentenceEditorWrapper}>
+            <Box className={styles.divLineNumberWrapper}>
                 {sentenceLines.map((_, i) => (
                     <label key={"label" + i} className={styles.lblLineNumber}>
                         {i + 1}
                     </label>
                 ))}
-            </div>
+            </Box>
 
             <div className={styles.divSentenceWrapper}>
                 {isLocked ? (
@@ -157,7 +158,7 @@ const SentenceEditor: React.FC<SentenceEditorProps> = (
                     />
                 )}
             </div>
-        </div>
+        </Box>
     );
 };
 
