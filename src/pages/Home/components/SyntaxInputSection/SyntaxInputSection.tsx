@@ -24,6 +24,7 @@ import {
     LR0Production
 } from "../../../../modules/automatons/lr0/LR0";
 import { generateAutomaton } from "@/store/reducers/automaton";
+import { TransitionGroup } from "react-transition-group";
 
 const exampleGrammar1: LR0RawGrammar = {
     productions: [
@@ -119,25 +120,41 @@ const SyntaxInputSection = () => {
                     在此输入文法
                 </Typography>
                 <Stack>
-                    <Stack spacing={"2rem"}>
-                        {grammar.productions.map((item, index) => (
-                            <>
-                                <ProducerBlock
-                                    key={index}
-                                    production={item}
-                                    onChangeProduction={newProduction =>
-                                        handleChangeProduction(
-                                            newProduction,
-                                            index
-                                        )
+                    <Stack
+                        sx={{
+                            "& .SyntaxInputSection-transition-group": {
+                                "& .SyntaxInputSection-transition-group-collapse-root:not(:first-of-type) .ProducerBlock-root":
+                                    {
+                                        marginTop: "2rem"
+                                    },
+                                "& .SyntaxInputSection-transition-group-collapse-root:not(:last-of-type) .ProducerBlock-root":
+                                    {
+                                        marginBottom: "2rem"
                                     }
-                                    onDeleteProduction={() =>
-                                        handleDeleteProduction(index)
-                                    }
-                                />
-                                <Divider />
-                            </>
-                        ))}
+                            }
+                        }}
+                        spacing="2rem">
+                        <TransitionGroup className="SyntaxInputSection-transition-group">
+                            {grammar.productions.map((item, index) => (
+                                <Collapse className="SyntaxInputSection-transition-group-collapse-root">
+                                    <ProducerBlock
+                                        key={index}
+                                        production={item}
+                                        onChangeProduction={newProduction =>
+                                            handleChangeProduction(
+                                                newProduction,
+                                                index
+                                            )
+                                        }
+                                        onDeleteProduction={() =>
+                                            handleDeleteProduction(index)
+                                        }
+                                    />
+                                    <Divider />
+                                </Collapse>
+                            ))}
+                        </TransitionGroup>
+
                         <Button
                             variant="contained"
                             fullWidth
@@ -223,6 +240,7 @@ const ProducerBlock = (props: ProducerBlockProps) => {
 
     return (
         <Box
+            className="ProducerBlock-root"
             tabIndex={0}
             onFocus={() => setBlockFocus(true)}
             onBlur={() => setBlockFocus(false)}
@@ -234,7 +252,16 @@ const ProducerBlock = (props: ProducerBlockProps) => {
             }}>
             <Stack>
                 <Stack>
-                    <Stack spacing={"0.8rem"}>
+                    <Stack
+                        spacing={"0.8rem"}
+                        sx={{
+                            "& .ProducerBlock-transition-group": {
+                                "& .ProducerBlock-transition-group-collapse-root:not(:last-of-type) .MuiCollapse-wrapperInner":
+                                    {
+                                        marginBottom: "0.8rem"
+                                    }
+                            }
+                        }}>
                         <Stack alignItems="center" direction="row">
                             <Box sx={{ flex: 1, width: 0 }}>
                                 <SyntaxInputTextField
@@ -250,33 +277,39 @@ const ProducerBlock = (props: ProducerBlockProps) => {
                                 <ArrowDownwardIcon />
                             </Stack>
                         </Stack>
-                        {rightSide.map((producerRightSide, index) => (
-                            <SyntaxInputTextField
-                                key={index}
-                                value={producerRightSide}
-                                onChange={e =>
-                                    handleChangeProducerRightSidesValue(
-                                        e.target.value,
-                                        index
-                                    )
-                                }
-                                InputProps={{
-                                    endAdornment:
-                                        index !== 0 ? (
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    onClick={() =>
-                                                        handleRemoveRightSide(
-                                                            index
-                                                        )
-                                                    }>
-                                                    <ClearIcon />
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ) : undefined
-                                }}
-                            />
-                        ))}
+                        <TransitionGroup className="ProducerBlock-transition-group">
+                            {rightSide.map((producerRightSide, index) => (
+                                <Collapse
+                                    key={index}
+                                    className="ProducerBlock-transition-group-collapse-root">
+                                    <SyntaxInputTextField
+                                        fullWidth
+                                        value={producerRightSide}
+                                        onChange={e =>
+                                            handleChangeProducerRightSidesValue(
+                                                e.target.value,
+                                                index
+                                            )
+                                        }
+                                        InputProps={{
+                                            endAdornment:
+                                                index !== 0 ? (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            onClick={() =>
+                                                                handleRemoveRightSide(
+                                                                    index
+                                                                )
+                                                            }>
+                                                            <ClearIcon />
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ) : undefined
+                                        }}
+                                    />
+                                </Collapse>
+                            ))}
+                        </TransitionGroup>
                     </Stack>
                     <Collapse in={blockFocus}>
                         <Box sx={{ paddingTop: "0.8rem" }}>
