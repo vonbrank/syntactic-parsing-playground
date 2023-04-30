@@ -15,7 +15,7 @@ export const DefaultAppContainer = (props: DefaultAppContainerProps) => {
                 sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
                 onMenuButtonClick={() => setDrawOpen(current => !current)}
             />
-            <Stack sx={{ flex: 1 }}>
+            <Stack sx={{ flex: 1, position: "relative" }}>
                 <AppSideBarDrawer
                     open={drawOpen}
                     onClose={() => setDrawOpen(false)}

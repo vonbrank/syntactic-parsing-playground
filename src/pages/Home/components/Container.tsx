@@ -90,7 +90,7 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
     } = props;
 
     return (
-        <Box sx={{ flex: 1, height: 0, position: "relative" }}>
+        <>
             <Drawer
                 PaperProps={{
                     sx: {
@@ -122,6 +122,6 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
                 {bottomPanel}
             </Drawer>
             {analysisControlWidget}
-        </Box>
+        </>
     );
 };
