@@ -7,6 +7,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AnalysisTable from "./AnalysisTable";
 import SyntaxInputSection from "./SyntaxInputSection";
 import SentenceEditor from "./SentenceEditor/SentenceEditor";
+import { Sentence } from "./SentenceEditor/SentenceEditor";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -100,7 +101,11 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
     } = props;
 
     const [isLocked, setIsLocked] = useState(false);
-    const [demoSentence, setDemoSentence] = useState("");
+    const [demoSentence, setDemoSentence] = useState<Sentence>({
+        data: "",
+        selectionStart: 0,
+        selectionEnd: 0
+    });
 
     return (
         <Stack
