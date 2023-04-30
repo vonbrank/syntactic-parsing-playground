@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { IconButton, Tabs, Tab, StackProps, Checkbox } from "@mui/material";
+import {
+    IconButton,
+    Tabs,
+    Tab,
+    StackProps,
+    Checkbox,
+    Box,
+    Paper
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
@@ -116,7 +124,12 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
             {...others}>
             <IconButton
                 onClick={() => setBottomDrawerOpen(false)}
-                sx={{ position: "absolute", top: 0, right: 0 }}>
+                sx={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    transform: "translateX(-50%)"
+                }}>
                 <CloseIcon />
             </IconButton>
 

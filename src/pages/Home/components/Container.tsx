@@ -1,11 +1,34 @@
 import React from "react";
-import { Stack, StackProps, Toolbar } from "@mui/material";
+import { Stack, StackProps, Toolbar, Box, useTheme } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
+import { Theme } from "@mui/material/styles";
 
 interface SidePanelContainerProps extends StackProps {
     bottomDrawerOpen: boolean;
     bottomDrawerHeight: string;
 }
+
+export const getTransitionMarginByBottomDrawer: (
+    theme: Theme,
+    bottomDrawerOpen: boolean,
+    bottomDrawerHeight: string
+) => [string, string | number] = (
+    theme: Theme,
+    bottomDrawerOpen: boolean,
+    bottomDrawerHeight: string
+) => {
+    const transition = bottomDrawerOpen
+        ? theme.transitions.create("margin", {
+              easing: theme.transitions.easing.easeOut,
+              duration: theme.transitions.duration.enteringScreen
+          })
+        : theme.transitions.create("margin", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen
+          });
+    const marginBottom = bottomDrawerOpen ? `${bottomDrawerHeight}` : "0rem";
+    return [transition, marginBottom];
+};
 
 const SidePanelContainer = (props: SidePanelContainerProps) => {
     const {
@@ -18,6 +41,13 @@ const SidePanelContainer = (props: SidePanelContainerProps) => {
         ...others
     } = props;
 
+    const theme = useTheme();
+    const [transition, marginBottom] = getTransitionMarginByBottomDrawer(
+        theme,
+        bottomDrawerOpen,
+        bottomDrawerHeight
+    );
+
     return (
         <>
             <Toolbar />
@@ -27,21 +57,8 @@ const SidePanelContainer = (props: SidePanelContainerProps) => {
                 sx={{
                     flex: 1,
                     height: 0,
-                    transition: theme =>
-                        bottomDrawerOpen
-                            ? theme.transitions.create("margin", {
-                                  easing: theme.transitions.easing.easeOut,
-                                  duration:
-                                      theme.transitions.duration.enteringScreen
-                              })
-                            : theme.transitions.create("margin", {
-                                  easing: theme.transitions.easing.sharp,
-                                  duration:
-                                      theme.transitions.duration.leavingScreen
-                              }),
-                    marginBottom: bottomDrawerOpen
-                        ? `${bottomDrawerHeight}`
-                        : 0,
+                    transition: transition,
+                    marginBottom: marginBottom,
                     ...(sx || {})
                 }}
                 {...others}>
@@ -55,11 +72,12 @@ interface AnalysisPanelsContainerProps {
     leftPanel: React.ReactNode;
     rightPanel: React.ReactNode;
     bottomPanel: React.ReactNode;
+    analysisControlWidget: React.ReactNode;
     bottomPanelOpen: boolean;
     bottomDrawerHeight: string;
 }
 
-export const AnalysisPanelsContainer = (
+export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
     props: AnalysisPanelsContainerProps
 ) => {
     const {
@@ -67,11 +85,12 @@ export const AnalysisPanelsContainer = (
         rightPanel,
         bottomDrawerHeight,
         bottomPanelOpen,
-        bottomPanel
+        bottomPanel,
+        analysisControlWidget
     } = props;
 
     return (
-        <>
+        <Box sx={{ flex: 1, height: 0, position: "relative" }}>
             <Drawer
                 PaperProps={{
                     sx: {
@@ -102,6 +121,7 @@ export const AnalysisPanelsContainer = (
             <Drawer anchor="bottom" variant="persistent" open={bottomPanelOpen}>
                 {bottomPanel}
             </Drawer>
-        </>
+            {analysisControlWidget}
+        </Box>
     );
 };

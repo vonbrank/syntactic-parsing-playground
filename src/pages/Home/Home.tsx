@@ -4,12 +4,18 @@ import {
     SyntaxInputPanel,
     AnalysisPatternPanel
 } from "./components/Panel";
-import { AnalysisPanelsContainer } from "./components/Container";
+import {
+    AnalysisPanelsContainer,
+    getTransitionMarginByBottomDrawer
+} from "./components/Container";
 import { DefaultAppContainer } from "@/components/Container";
 import AutomatonGraph from "./components/AutomatonGraph/AutomatonGraph";
 import { exampleAutomaton } from "./components/AutomatonGraph/AutomatonGraph";
 import { useAppSelector } from "../../store/hooks";
 import { v4 as uuidv4 } from "uuid";
+import { Box, IconButton, useTheme, Stack } from "@mui/material";
+import Paper from "@mui/material/Paper";
+import { AnalysisControlWidget } from "./components/Widget";
 
 const bottomDrawerHeight = "24rem";
 
@@ -50,6 +56,12 @@ const Home = () => {
                     <AnalysisPatternPanel
                         bottomDrawerHeight={bottomDrawerHeight}
                         setBottomDrawerOpen={setBottomDrawerOpen}
+                    />
+                }
+                analysisControlWidget={
+                    <AnalysisControlWidget
+                        bottomDrawerOpen={bottomDrawerOpen}
+                        bottomDrawerHeight={bottomDrawerHeight}
                     />
                 }
             />

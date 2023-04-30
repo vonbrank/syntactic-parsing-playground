@@ -15,13 +15,13 @@ export const DefaultAppContainer = (props: DefaultAppContainerProps) => {
                 sx={{ zIndex: theme => theme.zIndex.drawer + 1 }}
                 onMenuButtonClick={() => setDrawOpen(current => !current)}
             />
-            <Box sx={{ flex: 1 }}>
+            <Stack sx={{ flex: 1 }}>
                 <AppSideBarDrawer
                     open={drawOpen}
                     onClose={() => setDrawOpen(false)}
                 />
                 {children}
-            </Box>
+            </Stack>
         </Stack>
     );
 };
