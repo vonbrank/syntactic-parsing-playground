@@ -61,7 +61,7 @@ const exampleGrammar2: LR0RawGrammar = {
 const SyntaxInputSection = () => {
     const disptach = useAppDispatch();
 
-    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar1);
+    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar2);
 
     const handleChangeProduction = (
         newProduction: LR0Production,

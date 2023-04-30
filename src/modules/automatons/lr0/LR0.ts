@@ -31,6 +31,8 @@ export interface LR0AutomatonState extends LR0AutomatonStateBase {
 
 export interface LR0Automaton {
     name?: string;
+    startId: number;
+    endId: number;
     states: LR0AutomatonState[];
 }
 
@@ -264,25 +266,143 @@ const LR0States = (standardGrammar: LR0StandardGrammar) => {
 export const AnalyseLR0Grammar: (
     grammar: LR0RawGrammar
 ) => LR0Automaton = grammar => {
-    const automaton: LR0Automaton = {
-        states: []
-    };
-
     const standarGrammar = rawGrammarToStandardGrammar(grammar);
 
-    automaton.states = LR0States(standarGrammar);
+    const states = LR0States(standarGrammar);
+    let startId = -1;
+    let endId = -1;
+    states.forEach(state => {
+        state.itemSet.forEach(item => {
+            if (item.leftSide === standarGrammar.startCharacter) {
+                if (item.dotPos === 0) {
+                    startId = state.id;
+                } else if (item.dotPos === 1) {
+                    endId = state.id;
+                }
+            }
+        });
+    });
+    const automaton: LR0Automaton = {
+        states,
+        startId,
+        endId
+    };
+
     console.log(automaton);
     return automaton;
+};
+
+const ReduceLR0AnalysingPatternForOneStep: (
+    previousPattern: LR0AnalysingPattern,
+    automaton: LR0Automaton
+) => LR0AnalysingPattern = (previousPattern, automaton) => {
+    const {
+        stateStack,
+        characterStack,
+        remainCharacters,
+        initialSentence,
+        currentStepIndex
+    } = previousPattern;
+    const currentTopStateId = stateStack[stateStack.length - 1];
+    const currentState = automaton.states[currentTopStateId];
+    const currentTopCharacter = characterStack[characterStack.length - 1];
+
+    if (currentState.id === automaton.endId) {
+        console.log("analysis succeeds...");
+        return previousPattern;
+    }
+
+    if (stateStack.length !== characterStack.length) {
+        const target =
+            currentState.targets.find(target => {
+                return (
+                    target.transferSymbols.findIndex(
+                        transferSymbol => transferSymbol === currentTopCharacter
+                    ) !== -1
+                );
+            }) || null;
+
+        if (target === null) return previousPattern;
+
+        const newPattern: LR0AnalysingPattern = {
+            ...previousPattern,
+            currentStepIndex: currentStepIndex + 1,
+            stateStack: [...stateStack, target.id]
+        };
+        return newPattern;
+    }
+
+    const currentNextCharacter = remainCharacters[0];
+
+    const target =
+        currentState.targets.find(target => {
+            return (
+                target.transferSymbols.findIndex(
+                    transferSymbol => transferSymbol === currentNextCharacter
+                ) !== -1
+            );
+        }) || null;
+
+    if (target !== null) {
+        const newPattern: LR0AnalysingPattern = {
+            currentStepIndex: currentStepIndex + 1,
+            stateStack: [...stateStack, target.id],
+            characterStack: [...characterStack, currentNextCharacter],
+            remainCharacters: remainCharacters.slice(1),
+            initialSentence: initialSentence
+        };
+        return newPattern;
+    }
+
+    const production =
+        currentState.itemSet.find(item => {
+            const characterStackStr = characterStack.slice(1).join("");
+            if (characterStackStr.endsWith(item.rightSide.join(""))) {
+                return true;
+            }
+            return false;
+        }) || null;
+
+    if (production !== null) {
+        let characterStackStr = characterStack.join("");
+        let newCharacterStackStr = characterStackStr.slice(
+            0,
+            characterStackStr.length - production.rightSide.join("").length
+        );
+        let newCharacterStack = [...newCharacterStackStr, production.leftSide];
+        // console.log("characterStackStr = ", characterStackStr);
+        // console.log(
+        //     "production.rightSide.join() = ",
+        //     production.rightSide.join("")
+        // );
+        // console.log("newCharacterStackStr = ", newCharacterStackStr);
+        // console.log("newCharacterStack = ", newCharacterStack);
+        let newStateStack = stateStack.slice(0, newCharacterStack.length - 1);
+        const newPattern: LR0AnalysingPattern = {
+            ...previousPattern,
+            currentStepIndex: currentStepIndex + 1,
+            stateStack: newStateStack,
+            characterStack: newCharacterStack
+        };
+        return newPattern;
+    }
+
+    return previousPattern;
 };
 
 export const ReduceLR0AnalysingPattern: (
     previousPattern: LR0AnalysingPattern,
     automaton: LR0Automaton,
     stepNumber: number
-) => LR0AnalysingPattern = (previousPattern, automaton, stepNumber) => {
-    // TODO 从先前格局推算指定步骤数
-
-    return previousPattern;
+) => LR0AnalysingPattern = (previousPattern, automaton, stepNumber = 1) => {
+    let currentPattern = previousPattern;
+    for (let i = 0; i < stepNumber; i++) {
+        currentPattern = ReduceLR0AnalysingPatternForOneStep(
+            currentPattern,
+            automaton
+        );
+    }
+    return currentPattern;
 };
 
 export const InitialSentenceLR0AnalysingPattern: (

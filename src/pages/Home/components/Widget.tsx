@@ -16,6 +16,11 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import { TransitionGroup } from "react-transition-group";
 import styles from "./Widget.module.scss";
+import { useAppSelector } from "../../../store/hooks";
+import {
+    LR0AnalysingPattern,
+    ReduceLR0AnalysingPattern
+} from "@/modules/automatons/lr0";
 
 interface AnalysisControlWidgetProps {
     bottomDrawerOpen: boolean;
@@ -30,10 +35,51 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
         bottomDrawerOpen,
         bottomDrawerHeight
     );
-    const [mode, setMode] = useState<"Playing" | "Idle">("Playing");
+    const [mode, setMode] = useState<"Playing" | "Idle">("Idle");
+
+    const { automaton } = useAppSelector(state => ({
+        automaton: state.automaton.automaton
+    }));
+
+    const [currentPattern, setCurrentPattern] =
+        useState<LR0AnalysingPattern | null>(null);
+
+    const onStartAnalysing = () => {
+        if (automaton === null) return;
+
+        console.log("automaton = ", automaton);
+
+        setCurrentPattern({
+            currentStepIndex: 0,
+            stateStack: [0],
+            characterStack: ["$"],
+            remainCharacters: ["b", "a", "b", "$"],
+            initialSentence: "bab"
+        });
+    };
+
+    const handleAnalyseNextStep = () => {
+        if (automaton === null) return;
+        setCurrentPattern(current => {
+            if (current !== null) {
+                const newPattern = ReduceLR0AnalysingPattern(
+                    current,
+                    automaton,
+                    1
+                );
+                console.log("new pattern = ", newPattern);
+                return newPattern;
+            }
+            return current;
+        });
+    };
 
     const idleGroup = [
-        <IconButton onClick={() => setMode("Playing")}>
+        <IconButton
+            onClick={() => {
+                setMode("Playing");
+                onStartAnalysing();
+            }}>
             <PlayArrowIcon />
         </IconButton>
     ];
@@ -47,7 +93,7 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
         <IconButton>
             <SkipPreviousIcon />
         </IconButton>,
-        <IconButton>
+        <IconButton onClick={handleAnalyseNextStep}>
             <SkipNextIcon />
         </IconButton>,
         <IconButton>
