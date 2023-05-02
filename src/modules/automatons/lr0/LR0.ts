@@ -52,27 +52,27 @@ const getItemNextSymbole = (item: LR0Item) => {
     );
 };
 
-const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
+export const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
     const { productions } = rawGrammar;
-
     const rawNonTerminals = productions.map(production => production.leftSide);
-    const startCharacter = `${rawNonTerminals[0]}'`;
-    const nonTerminals = [startCharacter, ...rawNonTerminals];
 
-    const standarProductions: LR0Production[] = [
-        { leftSide: startCharacter, rightSide: [rawNonTerminals[0]] },
-        ...productions
-    ].reduce((acc, production) => {
-        const additionalProductions: LR0Production[] = production.rightSide.map(
-            str => {
-                return {
-                    leftSide: production.leftSide,
-                    rightSide: str.split(" ").filter(item => item !== "")
-                };
-            }
-        );
-        return [...acc, ...additionalProductions];
-    }, [] as LR0Production[]);
+    // const startCharacter = `${rawNonTerminals[0]}'`;
+
+    const nonTerminals = [...rawNonTerminals];
+
+    let standarProductions: LR0Production[] = productions.reduce(
+        (acc, production) => {
+            const additionalProductions: LR0Production[] =
+                production.rightSide.map(str => {
+                    return {
+                        leftSide: production.leftSide,
+                        rightSide: str.split(" ").filter(item => item !== "")
+                    };
+                });
+            return [...acc, ...additionalProductions];
+        },
+        [] as LR0Production[]
+    );
 
     const repeatTerminals = standarProductions.reduce((acc, production) => {
         const additionalTerminals = production.rightSide.filter(
@@ -87,6 +87,21 @@ const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
             repeatTerminals.findIndex(item => item === terminal) === index
     );
 
+    const rightSymbols = standarProductions.reduce((acc, production) => {
+        return [...acc, ...production.rightSide];
+    }, [] as string[]);
+    let startCharacter = "";
+    nonTerminals.forEach(nonTerminal => {
+        if (rightSymbols.findIndex(symbol => symbol === nonTerminal) === -1) {
+            startCharacter = nonTerminal;
+        }
+    });
+    standarProductions = [
+        { leftSide: `${startCharacter}'`, rightSide: [startCharacter] },
+        ...standarProductions
+    ];
+    startCharacter = `${startCharacter}'`;
+
     const standardGrammar: LR0StandardGrammar = {
         ...rawGrammar,
         productions: standarProductions,
@@ -94,6 +109,7 @@ const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
         nonTerminals: nonTerminals,
         terminals: terminals
     };
+
     return standardGrammar;
 };
 
@@ -418,4 +434,67 @@ export const InitialSentenceLR0AnalysingPattern: (
         initialSentence: sentence
     };
     return pattern;
+};
+
+export interface GrammarCheckResult {
+    standardGrammar: LR0StandardGrammar;
+    errorMessages: string[];
+}
+
+export const checkRawGrammar: (
+    grammar: LR0RawGrammar
+) => GrammarCheckResult = grammar => {
+    const standardGrammar = rawGrammarToStandardGrammar(grammar);
+    const { productions, nonTerminals } = standardGrammar;
+    const startSymbols: string[] = [];
+
+    const errorMessages: string[] = [];
+
+    const leftSymbols = productions.map(production => production.leftSide);
+
+    const rightSymbols = productions.reduce((acc, production) => {
+        return [...acc, ...production.rightSide.map(symbol => symbol)];
+    }, [] as string[]);
+
+    leftSymbols.forEach(leftSymbol => {
+        if (
+            rightSymbols.findIndex(
+                rightSymbol => leftSymbol === rightSymbol
+            ) === -1 &&
+            startSymbols.findIndex(
+                startSymbol => startSymbol === leftSymbol
+            ) === -1
+        ) {
+            startSymbols.push(leftSymbol);
+        }
+    });
+
+    if (startSymbols.length > 1) {
+        errorMessages.push(
+            `合法的文法应该只包含一个开始符号，但是现在有 ${
+                startSymbols.length
+            } 个：${startSymbols.join("，")}`
+        );
+    }
+
+    rightSymbols.forEach(rightSymbol => {
+        const isNonterminal =
+            nonTerminals.findIndex(
+                nonTerminal => nonTerminal === rightSymbol
+            ) !== -1;
+
+        const hasDefination =
+            leftSymbols.findIndex(leftSymbol => leftSymbol === rightSymbol) !==
+            -1;
+
+        if (isNonterminal && !hasDefination)
+            errorMessages.push(`缺少定义非终结符 ${rightSymbol} 的产生式`);
+    });
+
+    const res: GrammarCheckResult = {
+        standardGrammar: standardGrammar,
+        errorMessages
+    };
+
+    return res;
 };

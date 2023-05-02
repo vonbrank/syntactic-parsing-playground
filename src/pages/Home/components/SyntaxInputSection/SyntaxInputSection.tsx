@@ -11,13 +11,20 @@ import {
     TextFieldProps,
     Typography,
     alpha,
-    Divider
+    Divider,
+    Stepper,
+    Step,
+    StepLabel,
+    StackProps
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ClearIcon from "@mui/icons-material/Clear";
-import { AnalyseLR0Grammar } from "../../../../modules/automatons/lr0/LR0";
+import {
+    AnalyseLR0Grammar,
+    LR0Automaton
+} from "../../../../modules/automatons/lr0/LR0";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import {
     LR0RawGrammar,
@@ -30,6 +37,14 @@ import {
 import { TransitionGroup } from "react-transition-group";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import { checkRawGrammar } from "../../../../modules/automatons/lr0/LR0";
+import {
+    LR0StandardGrammar,
+    GrammarCheckResult
+} from "../../../../modules/automatons/lr0/LR0";
+import KeyboardIcon from "@mui/icons-material/Keyboard";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import Alert from "@mui/material/Alert";
 
 const exampleGrammar1: LR0RawGrammar = {
     productions: [
@@ -78,6 +93,24 @@ const exampleGrammar3: LR0RawGrammar = {
             rightSide: ["( E )", "id"]
         }
     ]
+};
+
+const steps = ["输入", "检查", "运行"];
+
+interface StandardGrammarBlockProps extends StackProps {
+    label: string;
+}
+
+const StandardGrammarBlock = (props: StandardGrammarBlockProps) => {
+    const { label, children, direction = "row", ...others } = props;
+    return (
+        <Stack direction={direction} {...others}>
+            <Box width={"9.6rem"} sx={{ flexShrink: 0 }}>
+                <Typography>{label}: </Typography>
+            </Box>
+            <Box>{children}</Box>
+        </Stack>
+    );
 };
 
 const SyntaxInputSection = () => {
@@ -132,91 +165,228 @@ const SyntaxInputSection = () => {
         });
     };
 
-    const [analysingLaunched, setAnalysingLaunched] = useState(false);
+    const [activeStep, setActiveStep] = useState<0 | 1 | 2>(0);
 
-    const switchAnalysingState = () => {
-        setAnalysingLaunched(current => {
-            if (current) disptach(disposeAutomaton());
-            else disptach(generateAutomaton(grammar));
-            return !current;
+    const getStepContent = (
+        stepIndex: number,
+        checkRes: GrammarCheckResult | null,
+        automaton: LR0Automaton | null
+    ) => {
+        const renderStandardGrammar = (standardGrammar: LR0StandardGrammar) => {
+            return (
+                <Stack>
+                    {standardGrammar.productions.map((production, index) => {
+                        return (
+                            <Stack direction={"row"} key={index}>
+                                <Typography className="Grammar-Symbol">{`(${index}) ${
+                                    production.leftSide
+                                } ➜  ${production.rightSide.join(
+                                    " "
+                                )}`}</Typography>
+                            </Stack>
+                        );
+                    })}
+                </Stack>
+            );
+        };
+
+        switch (stepIndex) {
+            case 0:
+                return (
+                    <>
+                        <Typography textAlign="center" marginY="2.4rem">
+                            请在此输入文法
+                        </Typography>
+                        <Stack>
+                            <Stack
+                                sx={{
+                                    "& .SyntaxInputSection-transition-group": {
+                                        "& .SyntaxInputSection-transition-group-collapse-root:not(:first-of-type) .ProducerBlock-root":
+                                            {
+                                                marginTop: "2rem"
+                                            },
+                                        "& .SyntaxInputSection-transition-group-collapse-root:not(:last-of-type) .ProducerBlock-root":
+                                            {
+                                                marginBottom: "2rem"
+                                            }
+                                    }
+                                }}
+                                spacing="2rem">
+                                <TransitionGroup className="SyntaxInputSection-transition-group">
+                                    {grammar.productions.map((item, index) => (
+                                        <Collapse
+                                            key={index}
+                                            className="SyntaxInputSection-transition-group-collapse-root">
+                                            <ProducerBlock
+                                                key={index}
+                                                production={item}
+                                                onChangeProduction={newProduction =>
+                                                    handleChangeProduction(
+                                                        newProduction,
+                                                        index
+                                                    )
+                                                }
+                                                onDeleteProduction={() =>
+                                                    handleDeleteProduction(
+                                                        index
+                                                    )
+                                                }
+                                            />
+                                            <Divider />
+                                        </Collapse>
+                                    ))}
+                                </TransitionGroup>
+
+                                <Button
+                                    variant="contained"
+                                    fullWidth
+                                    onClick={handleAddProduction}>
+                                    +
+                                </Button>
+                            </Stack>
+                        </Stack>
+                    </>
+                );
+                break;
+            case 1:
+                return (
+                    <>
+                        <Typography textAlign="center" marginY="2.4rem">
+                            已将您输入的文法转化为增广文法，请检查是否正确
+                        </Typography>
+                        <Stack spacing={"1.2rem"}>
+                            {checkRes && (
+                                <>
+                                    <StandardGrammarBlock label="非终结符">
+                                        <Typography className="Grammar-Symbol">
+                                            {checkRes.standardGrammar.nonTerminals.join(
+                                                ", "
+                                            )}
+                                        </Typography>
+                                    </StandardGrammarBlock>
+                                    <StandardGrammarBlock label="终结符">
+                                        <Typography className="Grammar-Symbol">
+                                            {checkRes.standardGrammar.terminals.join(
+                                                ", "
+                                            )}
+                                        </Typography>
+                                    </StandardGrammarBlock>
+                                    <StandardGrammarBlock
+                                        label="产生式"
+                                        direction={"column"}>
+                                        {renderStandardGrammar(
+                                            checkRes.standardGrammar
+                                        )}
+                                    </StandardGrammarBlock>
+                                    <StandardGrammarBlock label="开始符号">
+                                        <Typography className="Grammar-Symbol">
+                                            {
+                                                checkRes.standardGrammar
+                                                    .startCharacter
+                                            }
+                                        </Typography>
+                                    </StandardGrammarBlock>
+                                </>
+                            )}
+                        </Stack>
+                        {checkRes && (
+                            <Stack marginTop={"1.2rem"}>
+                                {checkRes.errorMessages.map(
+                                    (errorMessage, index) => (
+                                        <Alert severity="error">
+                                            {errorMessage}
+                                        </Alert>
+                                    )
+                                )}
+                            </Stack>
+                        )}
+                    </>
+                );
+                break;
+            case 2:
+                return (
+                    <>
+                        <Typography textAlign="center" marginY="2.4rem">
+                            单击左下角的 <KeyboardIcon />{" "}
+                            按钮以输入句子，单击中间下方的 <PlayArrowIcon />{" "}
+                            按钮开始分析
+                        </Typography>
+                        <Stack>
+                            {automaton &&
+                                renderStandardGrammar(
+                                    automaton.standardGrammar
+                                )}
+                        </Stack>
+                    </>
+                );
+                break;
+            default:
+                return <></>;
+        }
+    };
+
+    const [checkRes, setCheckRes] = useState<GrammarCheckResult | null>(null);
+
+    const handleBack = () => {
+        setActiveStep(current => {
+            if (current === 2) {
+                disptach(disposeAutomaton());
+            }
+
+            if (current === 1) {
+                setCheckRes(null);
+            }
+
+            if (current !== 0) {
+                const res = (current - 1) as 0 | 1;
+                return res;
+            }
+            return current;
+        });
+    };
+
+    const handleNext = () => {
+        setActiveStep(current => {
+            if (current === 0) {
+                const checkRes = checkRawGrammar(grammar);
+                setCheckRes(checkRes);
+            }
+
+            if (current === 1) {
+                disptach(generateAutomaton(grammar));
+            }
+
+            if (current !== 2) {
+                const res = (current + 1) as 1 | 2;
+                return res;
+            }
+            return current;
         });
     };
 
     return (
         <>
             <Box padding="2.4rem" sx={{ width: "100%", flex: 1 }}>
-                <Typography textAlign="center" marginBottom="2.4rem">
-                    在此输入文法
-                </Typography>
-                <Stack>
-                    {automaton === null ? (
-                        <Stack
-                            sx={{
-                                "& .SyntaxInputSection-transition-group": {
-                                    "& .SyntaxInputSection-transition-group-collapse-root:not(:first-of-type) .ProducerBlock-root":
-                                        {
-                                            marginTop: "2rem"
-                                        },
-                                    "& .SyntaxInputSection-transition-group-collapse-root:not(:last-of-type) .ProducerBlock-root":
-                                        {
-                                            marginBottom: "2rem"
-                                        }
-                                }
-                            }}
-                            spacing="2rem">
-                            <TransitionGroup className="SyntaxInputSection-transition-group">
-                                {grammar.productions.map((item, index) => (
-                                    <Collapse className="SyntaxInputSection-transition-group-collapse-root">
-                                        <ProducerBlock
-                                            key={index}
-                                            production={item}
-                                            onChangeProduction={newProduction =>
-                                                handleChangeProduction(
-                                                    newProduction,
-                                                    index
-                                                )
-                                            }
-                                            onDeleteProduction={() =>
-                                                handleDeleteProduction(index)
-                                            }
-                                        />
-                                        <Divider />
-                                    </Collapse>
-                                ))}
-                            </TransitionGroup>
-
-                            <Button
-                                variant="contained"
-                                fullWidth
-                                onClick={handleAddProduction}>
-                                +
-                            </Button>
-                        </Stack>
-                    ) : (
-                        <Stack
-                            sx={{
-                                "& .MuiTypography-root": {
-                                    fontFamily: `"Roboto Mono", monospace`,
-                                    fontSize: "1.8rem"
-                                }
-                            }}>
-                            {automaton.standardGrammar.productions.map(
-                                (production, index) => {
-                                    if (index === 0) return <></>;
-                                    return (
-                                        <Stack direction={"row"} key={index}>
-                                            <Typography>{`(${index}) ${
-                                                production.leftSide
-                                            } ➜  ${production.rightSide.join(
-                                                " "
-                                            )}`}</Typography>
-                                        </Stack>
-                                    );
-                                }
-                            )}
-                        </Stack>
-                    )}
-                </Stack>
+                <Stepper activeStep={activeStep}>
+                    {steps.map((label, index) => {
+                        return (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        );
+                    })}
+                </Stepper>
+                <Box
+                    sx={{
+                        "& .MuiTypography-root": {
+                            "&.Grammar-Symbol": {
+                                fontFamily: `"Roboto Mono", monospace`
+                            },
+                            fontSize: "1.8rem"
+                        }
+                    }}>
+                    {getStepContent(activeStep, checkRes, automaton)}
+                </Box>
             </Box>
             <Box
                 sx={{
@@ -232,16 +402,25 @@ const SyntaxInputSection = () => {
                         )}`,
                     zIndex: theme => theme.zIndex.drawer - 3
                 }}>
-                <Stack direction="row" justifyContent="end">
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={analysingLaunched}
-                                onChange={switchAnalysingState}
-                            />
-                        }
-                        label="分析"
-                    />
+                <Stack direction="row" justifyContent="space-between">
+                    <Box>
+                        {activeStep !== 0 && (
+                            <Button onClick={handleBack}>返回</Button>
+                        )}
+                    </Box>
+                    <Box>
+                        {activeStep !== 2 && (
+                            <Button
+                                onClick={handleNext}
+                                disabled={
+                                    activeStep === 1 &&
+                                    (checkRes === null ||
+                                        checkRes.errorMessages.length > 0)
+                                }>
+                                {activeStep === 0 ? "下一步" : "确认"}
+                            </Button>
+                        )}
+                    </Box>
                 </Stack>
             </Box>
         </>
