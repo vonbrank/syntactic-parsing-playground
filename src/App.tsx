@@ -5,6 +5,7 @@ import router from "./router";
 import { lightTheme, darkTheme } from "./theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { IntlProvider } from "react-intl";
+import { Toast } from "./components/SnackBar";
 
 const App: React.FC = () => {
     const currentLocale = useAppSelector(state => state.locale.currentLocale);
@@ -14,6 +15,7 @@ const App: React.FC = () => {
             <ThemeProvider theme={lightTheme}>
                 <CssBaseline />
                 <RouterProvider router={router} />
+                <Toast />
             </ThemeProvider>
         </IntlProvider>
     );
