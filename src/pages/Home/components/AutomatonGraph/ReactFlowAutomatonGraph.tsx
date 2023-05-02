@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, memo } from "react";
 import { LR0Automaton, LR0Production } from "@/modules/automatons/lr0/LR0";
 import {
     ReactFlow,
@@ -7,10 +7,15 @@ import {
     MiniMap,
     Controls,
     Background,
-    Edge
+    Edge,
+    NodeProps,
+    Handle,
+    Position,
+    NodeTypes
 } from "reactflow";
-import { Box } from "@mui/material";
+import { Box, Divider, Paper, Stack } from "@mui/material";
 import "reactflow/dist/style.css";
+import Typography from "@mui/material/Typography/Typography";
 
 interface AutomatonGraphProps {
     automaton: LR0Automaton | null;
@@ -26,6 +31,58 @@ interface AutomatonNodeData {
 }
 
 interface AutomatonEdgeData {}
+
+interface AutomatonNodeProps extends NodeProps<AutomatonNodeData> {}
+
+const AutomatonNode = memo((props: AutomatonNodeProps) => {
+    const { data, isConnectable } = props;
+    const { productions } = data;
+
+    return (
+        <>
+            <Handle
+                type="target"
+                position={Position.Top}
+                isConnectable={isConnectable}
+            />
+            <Paper>
+                <Stack
+                    paddingY="1.6rem"
+                    spacing={"0.4rem"}
+                    sx={{
+                        "& .MuiTypography-root": {
+                            fontFamily: `"Roboto Mono", monospace`
+                        }
+                    }}>
+                    <Box paddingX="1.6rem">
+                        <Typography textAlign={"center"}>
+                            {data.label}
+                        </Typography>
+                    </Box>
+                    <Divider />
+                    <Stack paddingX="1.6rem">
+                        {data.productions.map(production => (
+                            <Typography>
+                                {`${
+                                    production.leftSide
+                                } ➜ ${production.rightSide.join(" ")}`}
+                            </Typography>
+                        ))}
+                    </Stack>
+                </Stack>
+            </Paper>
+            <Handle
+                type="source"
+                position={Position.Bottom}
+                isConnectable={isConnectable}
+            />
+        </>
+    );
+});
+
+const nodeTypes: NodeTypes = {
+    itemSet: AutomatonNode
+};
 
 const AutomatonGraph = (props: AutomatonGraphProps) => {
     const { automaton } = props;
@@ -87,9 +144,10 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     id: `node-${state.id}`,
                     data: {
                         label: `state-${state.id}`,
-                        productions: []
+                        productions: state.itemSet
                     },
-                    position: { x: x * 300, y: y * 100 }
+                    position: { x: x * 300, y: y * 100 },
+                    type: "itemSet"
                 };
             })
         );
@@ -128,6 +186,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                nodeTypes={nodeTypes}
                 fitView
                 nodesConnectable={false}>
                 <MiniMap position="top-right" />
