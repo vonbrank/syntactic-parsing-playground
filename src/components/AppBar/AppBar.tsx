@@ -65,7 +65,7 @@ const DefaultAppBar = (props: DefaultAppBarProps) => {
                             color="inherit"
                             onClick={() => {
                                 window.open(
-                                    "https://github.com/vonbrank/Syntactic-Parsing-Playground",
+                                    "https://github.com/vonbrank/syntactic-parsing-playground",
                                     "_blank"
                                 );
                             }}>
