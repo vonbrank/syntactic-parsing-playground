@@ -1,1 +1,1 @@
-export { default } from "./AutomatonGraph";
+export { default } from "./ReactFlowAutomatonGraph";

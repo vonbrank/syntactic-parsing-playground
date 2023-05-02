@@ -9,8 +9,7 @@ import {
     getTransitionMarginByBottomDrawer
 } from "./components/Container";
 import { DefaultAppContainer } from "@/components/Container";
-import AutomatonGraph from "./components/AutomatonGraph/AutomatonGraph";
-import { exampleAutomaton } from "./components/AutomatonGraph/AutomatonGraph";
+import AutomatonGraph from "./components/AutomatonGraph";
 import { useAppSelector } from "../../store/hooks";
 import { v4 as uuidv4 } from "uuid";
 import { Box, IconButton, useTheme, Stack } from "@mui/material";
@@ -36,12 +35,7 @@ const Home = () => {
 
     return (
         <DefaultAppContainer>
-            {automaton && (
-                <AutomatonGraph
-                    key={automatonGraphKey}
-                    automatonStates={automaton.states}
-                />
-            )}
+            <AutomatonGraph key={automatonGraphKey} automaton={automaton} />
             <AnalysisPanelsContainer
                 bottomPanelOpen={bottomDrawerOpen}
                 bottomDrawerHeight={bottomDrawerHeight}

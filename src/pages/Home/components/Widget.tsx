@@ -105,36 +105,44 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
     };
 
     return (
-        <Box className={styles["AnalysisControlWidget-root"]}>
+        <Box
+            className={styles["AnalysisControlWidget-root"]}
+            sx={{
+                transform: `translate(-50%, 0)`
+            }}>
             <Box
                 sx={{
-                    marginLeft: "9rem",
                     transition: transition,
-                    marginBottom: `calc(${marginBottom} + 2.4rem)`
+                    marginBottom: marginBottom,
+                    transform: `translate(4.5rem, -2.4rem)`
                 }}>
-                <Grow in={automaton !== null}>
-                    <Paper>
-                        <Box>
-                            <TransitionGroup
-                                className={
-                                    styles[
-                                        "AnalysisControlWidget-transition-group"
-                                    ]
-                                }>
-                                {currentGroup.map((item, index) => (
-                                    <Collapse
-                                        key={item}
-                                        orientation="horizontal">
-                                        <IconButton
-                                            onClick={() => handleAction(item)}>
-                                            {labelToButtonIcon[item]}
-                                        </IconButton>
-                                    </Collapse>
-                                ))}
-                            </TransitionGroup>
-                        </Box>
-                    </Paper>
-                </Grow>
+                <Box>
+                    <Grow in={automaton !== null}>
+                        <Paper>
+                            <Box>
+                                <TransitionGroup
+                                    className={
+                                        styles[
+                                            "AnalysisControlWidget-transition-group"
+                                        ]
+                                    }>
+                                    {currentGroup.map((item, index) => (
+                                        <Collapse
+                                            key={item}
+                                            orientation="horizontal">
+                                            <IconButton
+                                                onClick={() =>
+                                                    handleAction(item)
+                                                }>
+                                                {labelToButtonIcon[item]}
+                                            </IconButton>
+                                        </Collapse>
+                                    ))}
+                                </TransitionGroup>
+                            </Box>
+                        </Paper>
+                    </Grow>
+                </Box>
             </Box>
         </Box>
     );
