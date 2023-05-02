@@ -19,10 +19,12 @@ import { TransitionGroup } from "react-transition-group";
 import styles from "./Widget.module.scss";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import {
+    analysingToTheEnd,
     startAnalysingSentence,
     stopAnalysingSentence,
     updateAnalysingPattern
 } from "@/store/reducers/automaton";
+import { showTemporaryToastText } from "@/store/reducers/toast";
 
 interface AnalysisControlWidgetProps {
     bottomDrawerOpen: boolean;
@@ -49,8 +51,9 @@ type ActionLabel = keyof typeof labelToButtonIcon;
 export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
     const { bottomDrawerHeight, bottomDrawerOpen } = props;
     const dispatch = useAppDispatch();
-    const { automaton } = useAppSelector(state => ({
-        automaton: state.automaton.automaton
+    const { automaton, analysingPatternRes } = useAppSelector(state => ({
+        automaton: state.automaton.automaton,
+        analysingPatternRes: state.automaton.analysingPatternRes
     }));
     const theme = useTheme();
     const [transition, marginBottom] = getTransitionMarginByBottomDrawer(
@@ -71,6 +74,10 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
 
     const handleAnalyseNextStep = () => {
         dispatch(updateAnalysingPattern("NEXT"));
+    };
+
+    const handleAnalyseToFinal = () => {
+        dispatch(analysingToTheEnd());
     };
 
     const [currentGroup, setCurrentGroup] = useState<ActionLabel[]>([]);
@@ -100,9 +107,30 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
             case "Next":
                 handleAnalyseNextStep();
                 break;
+            case "Fast Forward":
+                handleAnalyseToFinal();
+                break;
             default:
         }
     };
+
+    useEffect(() => {
+        if (analysingPatternRes === null) return;
+
+        const { message, status } = analysingPatternRes;
+
+        if (message === null) return;
+
+        dispatch(
+            showTemporaryToastText({
+                severity:
+                    status === "OK" || status === "Success"
+                        ? "success"
+                        : "error",
+                message
+            })
+        );
+    }, [analysingPatternRes]);
 
     return (
         <Box

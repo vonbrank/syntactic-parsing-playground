@@ -310,10 +310,18 @@ export const AnalyseLR0Grammar: (
     return automaton;
 };
 
+export interface ReduceLR0AnalysingPatternResult {
+    status: "OK" | "Error" | "Success";
+    message: string | null;
+}
+
 const ReduceLR0AnalysingPatternForOneStep: (
     previousPattern: LR0AnalysingPattern,
     automaton: LR0Automaton
-) => LR0AnalysingPattern = (previousPattern, automaton) => {
+) => [LR0AnalysingPattern, ReduceLR0AnalysingPatternResult] = (
+    previousPattern,
+    automaton
+) => {
     const {
         stateStack,
         characterStack,
@@ -326,8 +334,23 @@ const ReduceLR0AnalysingPatternForOneStep: (
     const currentTopCharacter = characterStack[characterStack.length - 1];
 
     if (currentState.id === automaton.endId) {
-        console.log("analysis succeeds...");
-        return previousPattern;
+        if (remainCharacters[0] === "$") {
+            return [
+                previousPattern,
+                {
+                    status: "Success",
+                    message: "分析成功"
+                }
+            ];
+        }
+
+        return [
+            previousPattern,
+            {
+                status: "Error",
+                message: "自动机卡死"
+            }
+        ];
     }
 
     if (stateStack.length !== characterStack.length) {
@@ -340,14 +363,27 @@ const ReduceLR0AnalysingPatternForOneStep: (
                 );
             }) || null;
 
-        if (target === null) return previousPattern;
+        if (target === null)
+            return [
+                previousPattern,
+                {
+                    status: "Error",
+                    message: "自动机卡死"
+                }
+            ];
 
         const newPattern: LR0AnalysingPattern = {
             ...previousPattern,
             currentStepIndex: currentStepIndex + 1,
             stateStack: [...stateStack, target.id]
         };
-        return newPattern;
+        return [
+            newPattern,
+            {
+                status: "OK",
+                message: null
+            }
+        ];
     }
 
     const currentNextCharacter = remainCharacters[0];
@@ -361,17 +397,6 @@ const ReduceLR0AnalysingPatternForOneStep: (
             );
         }) || null;
 
-    if (target !== null) {
-        const newPattern: LR0AnalysingPattern = {
-            currentStepIndex: currentStepIndex + 1,
-            stateStack: [...stateStack, target.id],
-            characterStack: [...characterStack, currentNextCharacter],
-            remainCharacters: remainCharacters.slice(1),
-            initialSentence: initialSentence
-        };
-        return newPattern;
-    }
-
     const production =
         currentState.itemSet.find(item => {
             const characterStackStr = characterStack.slice(1).join("");
@@ -381,6 +406,33 @@ const ReduceLR0AnalysingPatternForOneStep: (
             return false;
         }) || null;
 
+    if (target !== null && production !== null) {
+        return [
+            previousPattern,
+            {
+                status: "Error",
+                message: "出现移入-规约冲突"
+            }
+        ];
+    }
+
+    if (target !== null) {
+        const newPattern: LR0AnalysingPattern = {
+            currentStepIndex: currentStepIndex + 1,
+            stateStack: [...stateStack, target.id],
+            characterStack: [...characterStack, currentNextCharacter],
+            remainCharacters: remainCharacters.slice(1),
+            initialSentence: initialSentence
+        };
+        return [
+            newPattern,
+            {
+                status: "OK",
+                message: null
+            }
+        ];
+    }
+
     if (production !== null) {
         let characterStackStr = characterStack.join("");
         let newCharacterStackStr = characterStackStr.slice(
@@ -388,13 +440,6 @@ const ReduceLR0AnalysingPatternForOneStep: (
             characterStackStr.length - production.rightSide.join("").length
         );
         let newCharacterStack = [...newCharacterStackStr, production.leftSide];
-        // console.log("characterStackStr = ", characterStackStr);
-        // console.log(
-        //     "production.rightSide.join() = ",
-        //     production.rightSide.join("")
-        // );
-        // console.log("newCharacterStackStr = ", newCharacterStackStr);
-        // console.log("newCharacterStack = ", newCharacterStack);
         let newStateStack = stateStack.slice(0, newCharacterStack.length - 1);
         const newPattern: LR0AnalysingPattern = {
             ...previousPattern,
@@ -402,25 +447,46 @@ const ReduceLR0AnalysingPatternForOneStep: (
             stateStack: newStateStack,
             characterStack: newCharacterStack
         };
-        return newPattern;
+        return [
+            newPattern,
+            {
+                status: "OK",
+                message: null
+            }
+        ];
     }
 
-    return previousPattern;
+    return [
+        previousPattern,
+        {
+            status: "Error",
+            message: "自动机卡死"
+        }
+    ];
 };
 
 export const ReduceLR0AnalysingPattern: (
     previousPattern: LR0AnalysingPattern,
     automaton: LR0Automaton,
     stepNumber: number
-) => LR0AnalysingPattern = (previousPattern, automaton, stepNumber = 1) => {
+) => [LR0AnalysingPattern, ReduceLR0AnalysingPatternResult] = (
+    previousPattern,
+    automaton,
+    stepNumber = 1
+) => {
     let currentPattern = previousPattern;
+    let res: ReduceLR0AnalysingPatternResult = {
+        status: "OK",
+        message: null
+    };
     for (let i = 0; i < stepNumber; i++) {
-        currentPattern = ReduceLR0AnalysingPatternForOneStep(
+        [currentPattern, res] = ReduceLR0AnalysingPatternForOneStep(
             currentPattern,
             automaton
         );
+        if (res.status === "Error") break;
     }
-    return currentPattern;
+    return [currentPattern, res];
 };
 
 export const InitialSentenceLR0AnalysingPattern: (

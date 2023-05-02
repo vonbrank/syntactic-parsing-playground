@@ -10,16 +10,19 @@ import {
     AnalyseLR0Grammar
 } from "../../../modules/automatons/lr0/LR0";
 import { UpdateAnalysingPatternOption } from "@/pages/Home/components/Widget";
+import { ReduceLR0AnalysingPatternResult } from "../../../modules/automatons/lr0/LR0";
 
 interface AutomatonState {
     automaton: LR0Automaton | null;
     currentPattern: LR0AnalysingPattern | null;
+    analysingPatternRes: ReduceLR0AnalysingPatternResult | null;
     inputSentence: Sentence;
 }
 
 const initialState: AutomatonState = {
     automaton: null,
     currentPattern: null,
+    analysingPatternRes: null,
     inputSentence: {
         data: "",
         selectionStart: 0,
@@ -65,15 +68,42 @@ export const automatonSlice = createSlice({
             switch (option) {
                 case "NEXT":
                     if (currentPattern !== null && automaton !== null) {
-                        const newPattern = ReduceLR0AnalysingPattern(
+                        const [newPattern, res] = ReduceLR0AnalysingPattern(
                             currentPattern,
                             automaton,
                             1
                         );
                         state.currentPattern = newPattern;
+                        state.analysingPatternRes = res;
                     }
                     break;
                 default:
+            }
+        },
+        analysingToTheEnd: state => {
+            let { currentPattern, automaton } = state;
+
+            while (true) {
+                if (currentPattern !== null && automaton !== null) {
+                    let res: ReduceLR0AnalysingPatternResult | null = null;
+                    [currentPattern, res] = ReduceLR0AnalysingPattern(
+                        currentPattern,
+                        automaton,
+                        1
+                    );
+                    state.currentPattern = currentPattern;
+                    state.analysingPatternRes = res;
+
+                    if (res.status === "Error" || res.status === "Success") {
+                        break;
+                    }
+                } else {
+                    state.analysingPatternRes = {
+                        status: "Error",
+                        message: "自动机或初始分析格局尚未创建"
+                    };
+                    break;
+                }
             }
         }
     }
@@ -85,7 +115,8 @@ export const {
     startAnalysingSentence,
     stopAnalysingSentence,
     updateAnalysingPattern,
-    disposeAutomaton
+    disposeAutomaton,
+    analysingToTheEnd
 } = automatonSlice.actions;
 
 export default automatonSlice.reducer;
