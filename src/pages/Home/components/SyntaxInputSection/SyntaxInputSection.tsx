@@ -86,7 +86,7 @@ const SyntaxInputSection = () => {
         automaton: state.automaton.automaton
     }));
 
-    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar3);
+    const [grammar, setGrammar] = useState<LR0RawGrammar>(exampleGrammar2);
 
     const handleChangeProduction = (
         newProduction: LR0Production,

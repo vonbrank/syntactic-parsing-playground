@@ -19,8 +19,9 @@ import { AnalysisControlWidget } from "./components/Widget";
 const bottomDrawerHeight = "24rem";
 
 const Home = () => {
-    const { automaton } = useAppSelector(state => ({
-        automaton: state.automaton.automaton
+    const { automaton, currentPattern } = useAppSelector(state => ({
+        automaton: state.automaton.automaton,
+        currentPattern: state.automaton.currentPattern
     }));
 
     const [bottomDrawerOpen, setBottomDrawerOpen] = useState(false);
@@ -35,7 +36,11 @@ const Home = () => {
 
     return (
         <DefaultAppContainer>
-            <AutomatonGraph key={automatonGraphKey} automaton={automaton} />
+            <AutomatonGraph
+                key={automatonGraphKey}
+                automaton={automaton}
+                currentPattern={currentPattern}
+            />
             <AnalysisPanelsContainer
                 bottomPanelOpen={bottomDrawerOpen}
                 bottomDrawerHeight={bottomDrawerHeight}

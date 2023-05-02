@@ -1,5 +1,6 @@
 import React, { useEffect, memo } from "react";
 import {
+    LR0AnalysingPattern,
     LR0Automaton,
     LR0AutomatonState,
     LR0Item,
@@ -16,7 +17,8 @@ import {
     NodeProps,
     Handle,
     Position,
-    NodeTypes
+    NodeTypes,
+    MarkerType
 } from "reactflow";
 import { Box, Divider, Paper, Stack } from "@mui/material";
 import "reactflow/dist/style.css";
@@ -24,6 +26,7 @@ import Typography from "@mui/material/Typography/Typography";
 
 interface AutomatonGraphProps {
     automaton: LR0Automaton | null;
+    currentPattern: LR0AnalysingPattern | null;
 }
 
 const paddingLeft = `${32 + 9}rem`;
@@ -32,7 +35,11 @@ const paddingTop = `${6.4}rem`;
 
 interface AutomatonNodeData {
     label: string;
+    stateId: number;
     itemSet: LR0Item[];
+    startState: boolean;
+    endState: boolean;
+    active: boolean;
 }
 
 interface AutomatonEdgeData {}
@@ -57,7 +64,17 @@ const itemFormat = (production: LR0Item) => {
 
 const AutomatonNode = memo((props: AutomatonNodeProps) => {
     const { data, isConnectable, xPos, yPos } = props;
-    const { itemSet: productions } = data;
+    const {
+        itemSet: productions,
+        active,
+        stateId,
+        startState,
+        endState
+    } = data;
+
+    let headerBackgroundColor: string | undefined = undefined;
+    if (startState || endState) headerBackgroundColor = "#e1f5fe";
+    else if (active) headerBackgroundColor = "#e8f5e9";
 
     return (
         <>
@@ -96,7 +113,8 @@ const AutomatonNode = memo((props: AutomatonNodeProps) => {
                     sx={{
                         "& .MuiTypography-root": {
                             fontFamily: `"Roboto Mono", monospace`
-                        }
+                        },
+                        backgroundColor: headerBackgroundColor
                     }}>
                     <Box paddingX="1.6rem">
                         <Typography textAlign={"center"}>
@@ -157,7 +175,7 @@ const nodeTypes: NodeTypes = {
 };
 
 const AutomatonGraph = (props: AutomatonGraphProps) => {
-    const { automaton } = props;
+    const { automaton, currentPattern } = props;
 
     const [nodes, setNodes, onNodesChange] = useNodesState<AutomatonNodeData>(
         []
@@ -190,11 +208,11 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     (acc, item) => Math.max(acc, [...itemFormat(item)].length),
                     0
                 ) + 1;
-            console.log(`state-${state.id}: `, {
-                fontWidth: NODE_FONT_WIDTH,
-                maxLength: maxLength * NODE_FONT_WIDTH,
-                x: maxLength * NODE_FONT_WIDTH + 2 * NODE_HORIZONTAL_PADDING
-            });
+            // console.log(`state-${state.id}: `, {
+            //     fontWidth: NODE_FONT_WIDTH,
+            //     maxLength: maxLength * NODE_FONT_WIDTH,
+            //     x: maxLength * NODE_FONT_WIDTH + 2 * NODE_HORIZONTAL_PADDING
+            // });
 
             return [
                 maxLength * NODE_FONT_WIDTH + 2 * NODE_HORIZONTAL_PADDING,
@@ -306,8 +324,8 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             if (noUpdate) break;
         }
 
-        console.log("coordinates", coordinates);
-        console.log("size", size);
+        // console.log("coordinates", coordinates);
+        // console.log("size", size);
 
         setNodes(
             states.map((state, index) => {
@@ -318,7 +336,11 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     id: `node-${state.id}`,
                     data: {
                         label: `state-${state.id}`,
-                        itemSet: state.itemSet
+                        itemSet: state.itemSet,
+                        startState: state.id === automaton.startId,
+                        endState: state.id === automaton.endId,
+                        active: false,
+                        stateId: state.id
                     },
                     position: { x: x * 10, y: y * 10 },
                     type: "itemSet"
@@ -347,7 +369,10 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                                 let sourceHandle = "";
                                 let targetHandle = "";
 
-                                if (direction === "horizontal") {
+                                if (state.id === target.id) {
+                                    sourceHandle = "right-source";
+                                    targetHandle = "bottom-target";
+                                } else if (direction === "horizontal") {
                                     if (x1 < x2) {
                                         sourceHandle = "right-source";
                                         targetHandle = "left-target";
@@ -370,6 +395,13 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                                     source: `node-${state.id}`,
                                     target: `node-${target.id}`,
                                     label: transferSymbol,
+                                    markerEnd: {
+                                        type: MarkerType.ArrowClosed
+                                    },
+                                    labelStyle: {
+                                        fontSize: "1.6rem"
+                                    },
+
                                     sourceHandle,
                                     targetHandle
                                 };
@@ -382,6 +414,62 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             }, [] as Edge<AutomatonEdgeData>[])
         );
     }, [automaton]);
+
+    useEffect(() => {
+        if (currentPattern === null) {
+            setEdges(current =>
+                current.map(edge => ({ ...edge, animated: false }))
+            );
+            return;
+        }
+
+        const activeEdgeIds: string[] = [];
+        const { stateStack } = currentPattern;
+
+        for (let i = 1; i < stateStack.length; i++) {
+            activeEdgeIds.push(`edge-${stateStack[i - 1]}-${stateStack[i]}`);
+        }
+
+        console.log(activeEdgeIds);
+
+        setEdges(current => {
+            return current.map(edge => {
+                if (activeEdgeIds.findIndex(id => id === edge.id) !== -1) {
+                    return {
+                        ...edge,
+                        animated: true
+                    };
+                }
+                return {
+                    ...edge,
+                    animated: false
+                };
+            });
+        });
+
+        setNodes(current => {
+            return current.map(node => {
+                if (
+                    stateStack.findIndex(id => node.data.stateId === id) !== -1
+                ) {
+                    return {
+                        ...node,
+                        data: {
+                            ...node.data,
+                            active: true
+                        }
+                    };
+                }
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        active: false
+                    }
+                };
+            });
+        });
+    }, [currentPattern]);
 
     return (
         <Box
