@@ -2,6 +2,7 @@ import React, { useEffect, memo } from "react";
 import {
     LR0Automaton,
     LR0AutomatonState,
+    LR0Item,
     LR0Production
 } from "@/modules/automatons/lr0/LR0";
 import {
@@ -31,7 +32,7 @@ const paddingTop = `${6.4}rem`;
 
 interface AutomatonNodeData {
     label: string;
-    productions: LR0Production[];
+    itemSet: LR0Item[];
 }
 
 interface AutomatonEdgeData {}
@@ -46,20 +47,47 @@ const NODE_FONT_SIZE = 1.6;
 const NODE_FONT_HEIGHT = NODE_FONT_SIZE * NODE_LINE_HEIGHT;
 const NODE_FONT_WIDTH = NODE_FONT_HEIGHT / 2.15;
 
-const itemFormat = (production: LR0Production) => {
-    return `${production.leftSide} ➜ ${production.rightSide.join(" ")}`;
+const itemFormat = (production: LR0Item) => {
+    return `${production.leftSide} ➜ ${production.rightSide
+        .slice(0, production.dotPos)
+        .join(" ")} . ${production.rightSide
+        .slice(production.dotPos)
+        .join(" ")}`;
 };
 
 const AutomatonNode = memo((props: AutomatonNodeProps) => {
     const { data, isConnectable, xPos, yPos } = props;
-    const { productions } = data;
+    const { itemSet: productions } = data;
 
     return (
         <>
             <Handle
                 type="target"
+                position={Position.Left}
+                isConnectable={isConnectable}
+                id="left-target"
+                style={{ top: "33%" }}
+            />
+            <Handle
+                type="source"
+                position={Position.Left}
+                isConnectable={isConnectable}
+                id="left-source"
+                style={{ top: "67%" }}
+            />
+            <Handle
+                type="target"
                 position={Position.Top}
                 isConnectable={isConnectable}
+                id="top-target"
+                style={{ left: "33%" }}
+            />
+            <Handle
+                type="source"
+                position={Position.Top}
+                isConnectable={isConnectable}
+                id="top-source"
+                style={{ left: "67%" }}
             />
             <Paper>
                 <Stack
@@ -72,13 +100,13 @@ const AutomatonNode = memo((props: AutomatonNodeProps) => {
                     }}>
                     <Box paddingX="1.6rem">
                         <Typography textAlign={"center"}>
-                            {/* {data.label}{" "} */}
-                            {`[${xPos.toFixed(0)}, ${yPos.toFixed(0)}]`}
+                            {data.label}{" "}
+                            {/* {`[${xPos.toFixed(0)}, ${yPos.toFixed(0)}]`} */}
                         </Typography>
                     </Box>
                     <Divider />
                     <Stack paddingX="1.6rem">
-                        {data.productions.map((production, index) => {
+                        {data.itemSet.map((production, index) => {
                             return (
                                 <Typography key={index}>
                                     {[...itemFormat(production)].map(
@@ -93,9 +121,32 @@ const AutomatonNode = memo((props: AutomatonNodeProps) => {
                 </Stack>
             </Paper>
             <Handle
+                type="target"
+                position={Position.Right}
+                isConnectable={isConnectable}
+                id="right-target"
+                style={{ top: "33%" }}
+            />
+            <Handle
+                type="source"
+                position={Position.Right}
+                isConnectable={isConnectable}
+                id="right-source"
+                style={{ top: "67%" }}
+            />
+            <Handle
+                type="target"
+                position={Position.Bottom}
+                isConnectable={isConnectable}
+                id="bottom-target"
+                style={{ left: "33%" }}
+            />
+            <Handle
                 type="source"
                 position={Position.Bottom}
                 isConnectable={isConnectable}
+                id="bottom-source"
+                style={{ left: "67%" }}
             />
         </>
     );
@@ -230,21 +281,21 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                             y1 + newVec[1]
                         ];
 
-                        console.log(`${i} vs ${j} = `, {
-                            x1,
-                            y1,
-                            x2,
-                            y2,
-                            w1,
-                            w2,
-                            minTargetWidth,
-                            minTargetHeight,
-                            targetMinDis,
-                            currentDis,
-                            vec,
-                            newVec,
-                            targetCoordinate
-                        });
+                        // console.log(`${i} vs ${j} = `, {
+                        //     x1,
+                        //     y1,
+                        //     x2,
+                        //     y2,
+                        //     w1,
+                        //     w2,
+                        //     minTargetWidth,
+                        //     minTargetHeight,
+                        //     targetMinDis,
+                        //     currentDis,
+                        //     vec,
+                        //     newVec,
+                        //     targetCoordinate
+                        // });
 
                         newCoordinates[j] = [...targetCoordinate];
                         noUpdate = false;
@@ -267,7 +318,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                     id: `node-${state.id}`,
                     data: {
                         label: `state-${state.id}`,
-                        productions: state.itemSet
+                        itemSet: state.itemSet
                     },
                     position: { x: x * 10, y: y * 10 },
                     type: "itemSet"
@@ -280,12 +331,49 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 const additionalEdges: Edge<AutomatonEdgeData>[] =
                     state.targets.reduce((acc, target) => {
                         const additionalEdges: Edge<AutomatonEdgeData>[] =
-                            target.transferSymbols.map(transferSymbol => ({
-                                id: `edge-${state.id}-${target.id}`,
-                                source: `node-${state.id}`,
-                                target: `node-${target.id}`,
-                                label: transferSymbol
-                            }));
+                            target.transferSymbols.map(transferSymbol => {
+                                const [x1, y1] = coordinates[state.id];
+                                const [x2, y2] = coordinates[target.id];
+                                const [w1, h1] = size[state.id];
+                                const [w2, h2] = size[state.id];
+                                const intervalX = Math.abs(x1 - x2) - (w1 + w2);
+                                const intervalY = Math.abs(y1 - y2) - (h1 + h2);
+
+                                const direction =
+                                    intervalX > intervalY
+                                        ? "horizontal"
+                                        : "vertical";
+
+                                let sourceHandle = "";
+                                let targetHandle = "";
+
+                                if (direction === "horizontal") {
+                                    if (x1 < x2) {
+                                        sourceHandle = "right-source";
+                                        targetHandle = "left-target";
+                                    } else {
+                                        sourceHandle = "left-source";
+                                        targetHandle = "right-target";
+                                    }
+                                } else {
+                                    if (y1 < y2) {
+                                        sourceHandle = "bottom-source";
+                                        targetHandle = "top-target";
+                                    } else {
+                                        sourceHandle = "top-source";
+                                        targetHandle = "bottom-target";
+                                    }
+                                }
+
+                                return {
+                                    id: `edge-${state.id}-${target.id}`,
+                                    source: `node-${state.id}`,
+                                    target: `node-${target.id}`,
+                                    label: transferSymbol,
+                                    sourceHandle,
+                                    targetHandle
+                                };
+                            });
 
                         return [...acc, ...additionalEdges];
                     }, [] as Edge<AutomatonEdgeData>[]);
