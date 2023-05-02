@@ -16,33 +16,48 @@ import LaunchIcon from "@mui/icons-material/Launch";
 import SaveIcon from "@mui/icons-material/Save";
 import SettingsIcon from "@mui/icons-material/Settings";
 import InfoIcon from "@mui/icons-material/Info";
+import { loadSingleJson } from "@/modules/fs/load";
+import { saveSingleJson } from "@/modules/fs/save";
 
 interface SideMenuItemData {
     label: string;
     icon: React.ReactNode;
+    onClick: () => void;
 }
 
 const sideMenuList: (SideMenuItemData | "Divider")[] = [
     {
         label: "清屏",
-        icon: <ClearIcon />
+        icon: <ClearIcon />,
+        onClick: () => {}
     },
     {
         label: "打开",
-        icon: <LaunchIcon />
+        icon: <LaunchIcon />,
+        onClick: () => {
+            loadSingleJson(
+                obj => console.log("Successfully loaded JSON", obj),
+                message => console.log("Error parsing JSON", message)
+            );
+        }
     },
     {
         label: "保存",
-        icon: <SaveIcon />
+        icon: <SaveIcon />,
+        onClick: () => {
+            saveSingleJson<{ x: number }>({ x: 123 }, "demo.json");
+        }
     },
     "Divider",
     {
         label: "设置",
-        icon: <SettingsIcon />
+        icon: <SettingsIcon />,
+        onClick: () => {}
     },
     {
         label: "关于",
-        icon: <InfoIcon />
+        icon: <InfoIcon />,
+        onClick: () => {}
     }
 ];
 
@@ -61,7 +76,9 @@ export const AppSideBarDrawer = (props: AppSideBarDrawerProps) => {
                             return <Divider key={index} />;
                         } else {
                             return (
-                                <ListItem key={index}>
+                                <ListItem
+                                    key={index}
+                                    onClick={sideMenuItem.onClick}>
                                     <ListItemButton>
                                         <ListItemIcon>
                                             {sideMenuItem.icon}
