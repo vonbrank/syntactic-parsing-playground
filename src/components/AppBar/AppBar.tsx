@@ -5,13 +5,16 @@ import {
     AppBar,
     Typography,
     IconButton,
-    AppBarProps
+    AppBarProps,
+    Box
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 interface DefaultAppBarProps extends AppBarProps {
     onMenuButtonClick?: () => void;
     appBarTitle?: React.ReactNode;
+    menuItems?: React.ReactNode;
 }
 
 const DefaultAppBar = (props: DefaultAppBarProps) => {
@@ -27,6 +30,7 @@ const DefaultAppBar = (props: DefaultAppBarProps) => {
                 Syntactic Parsing Playground
             </Typography>
         ),
+        menuItems = <></>,
         ...others
     } = props;
 
@@ -45,12 +49,30 @@ const DefaultAppBar = (props: DefaultAppBarProps) => {
                     }}>
                     {appBarTitle}
                 </Stack>
-                <IconButton
-                    size="large"
-                    color="inherit"
-                    onClick={() => onMenuButtonClick()}>
-                    <MenuIcon />
-                </IconButton>
+                <Stack
+                    direction={"row"}
+                    justifyContent="space-between"
+                    width={"100%"}>
+                    <IconButton
+                        size="large"
+                        color="inherit"
+                        onClick={() => onMenuButtonClick()}>
+                        <MenuIcon />
+                    </IconButton>
+                    <Stack direction={"row"}>
+                        <IconButton
+                            size="large"
+                            color="inherit"
+                            onClick={() => {
+                                window.open(
+                                    "https://github.com/vonbrank/Syntactic-Parsing-Playground",
+                                    "_blank"
+                                );
+                            }}>
+                            <GitHubIcon />
+                        </IconButton>
+                    </Stack>
+                </Stack>
             </Toolbar>
         </AppBar>
     );

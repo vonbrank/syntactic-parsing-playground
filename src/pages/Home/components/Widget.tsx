@@ -110,6 +110,14 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
             case "Fast Forward":
                 handleAnalyseToFinal();
                 break;
+            case "Previous":
+                dispatch(
+                    showTemporaryToastText({
+                        severity: "warning",
+                        message: "功能开发中，敬请期待"
+                    })
+                );
+                break;
             default:
         }
     };

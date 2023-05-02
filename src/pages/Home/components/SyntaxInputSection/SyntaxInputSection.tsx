@@ -583,7 +583,7 @@ const SyntaxInputTextField = styled(TextField)<SyntaxInputTextFieldProps>(
     ({ theme }) => ({
         "& .MuiInputBase-input": {
             padding: "0.4rem 0.8rem",
-            fontFamily: "consolas, monospace"
+            fontFamily: `"Roboto Mono", monospace`
         },
         "& .MuiInputBase-root": {
             paddingRight: 0

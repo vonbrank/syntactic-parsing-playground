@@ -21,6 +21,7 @@ import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import { updateInputSentence } from "@/store/reducers/automaton";
 import AnalysisPattern from "./AnalysisPattern";
 import { Divider } from "@mui/material";
+import { showTemporaryToastText } from "../../../store/reducers/toast/toast";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -33,12 +34,23 @@ const syntaxTypeList: SyntaxType[] = ["LR0", "SLR", "LR1", "LALR", "LL"];
 export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
     const { bottomDrawerOpen, setBottomDrawerOpen } = props;
 
+    const dispatch = useAppDispatch();
+
     const [syntaxType, setSyntaxType] = useState<SyntaxType | false>("LR0");
     const handleChangeSyntaxType = (newType: SyntaxType) => {
-        setSyntaxType(current => {
-            if (current === newType) return false;
-            return newType;
-        });
+        if (newType === "LR0") {
+            setSyntaxType(current => {
+                if (current === newType) return false;
+                return newType;
+            });
+        } else {
+            dispatch(
+                showTemporaryToastText({
+                    severity: "warning",
+                    message: "功能开发中，敬请期待"
+                })
+            );
+        }
     };
 
     return (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     Box,
     Drawer,
@@ -18,6 +18,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import InfoIcon from "@mui/icons-material/Info";
 import { loadSingleJson } from "@/modules/fs/load";
 import { saveSingleJson } from "@/modules/fs/save";
+import About from "@/pages/About";
 
 interface SideMenuItemData {
     label: string;
@@ -66,33 +67,51 @@ interface AppSideBarDrawerProps extends DrawerProps {}
 export const AppSideBarDrawer = (props: AppSideBarDrawerProps) => {
     const { anchor = "left", ...others } = props;
 
+    const [aboutPageOpen, setAboutPageOpen] = useState(false);
+    const handleAboutPageClose = () => {
+        setAboutPageOpen(false);
+    };
+    const handleClickMenuItem = (label: string) => {
+        if (label === "关于") {
+            setAboutPageOpen(true);
+        }
+    };
+
     return (
-        <Drawer anchor={anchor} {...others}>
-            <Toolbar />
-            <Box width={"32rem"}>
-                <List>
-                    {sideMenuList.map((sideMenuItem, index) => {
-                        if (sideMenuItem === "Divider") {
-                            return <Divider key={index} />;
-                        } else {
-                            return (
-                                <ListItem
-                                    key={index}
-                                    onClick={sideMenuItem.onClick}>
-                                    <ListItemButton>
-                                        <ListItemIcon>
-                                            {sideMenuItem.icon}
-                                        </ListItemIcon>
-                                        <ListItemText>
-                                            {sideMenuItem.label}
-                                        </ListItemText>
-                                    </ListItemButton>
-                                </ListItem>
-                            );
-                        }
-                    })}
-                </List>
-            </Box>
-        </Drawer>
+        <>
+            <Drawer anchor={anchor} {...others}>
+                <Toolbar />
+                <Box width={"32rem"}>
+                    <List>
+                        {sideMenuList.map((sideMenuItem, index) => {
+                            if (sideMenuItem === "Divider") {
+                                return <Divider key={index} />;
+                            } else {
+                                return (
+                                    <ListItem
+                                        key={index}
+                                        onClick={sideMenuItem.onClick}>
+                                        <ListItemButton
+                                            onClick={() =>
+                                                handleClickMenuItem(
+                                                    sideMenuItem.label
+                                                )
+                                            }>
+                                            <ListItemIcon>
+                                                {sideMenuItem.icon}
+                                            </ListItemIcon>
+                                            <ListItemText>
+                                                {sideMenuItem.label}
+                                            </ListItemText>
+                                        </ListItemButton>
+                                    </ListItem>
+                                );
+                            }
+                        })}
+                    </List>
+                </Box>
+            </Drawer>
+            <About open={aboutPageOpen} onClose={handleAboutPageClose} />
+        </>
     );
 };
