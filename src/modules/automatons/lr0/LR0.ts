@@ -334,7 +334,7 @@ const ReduceLR0AnalysingPatternForOneStep: (
     const currentTopCharacter = characterStack[characterStack.length - 1];
 
     if (currentState.id === automaton.endId) {
-        if (remainCharacters[0] === "$") {
+        if (remainCharacters.length === 0) {
             return [
                 previousPattern,
                 {

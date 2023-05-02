@@ -504,6 +504,7 @@ const ProducerBlock = (props: ProducerBlockProps) => {
                         <Stack alignItems="center" direction="row">
                             <Box sx={{ flex: 1, width: 0 }}>
                                 <SyntaxInputTextField
+                                    autoComplete="off"
                                     value={leftSide}
                                     onChange={e =>
                                         handleChangeLeftSide(e.target.value)
@@ -522,6 +523,7 @@ const ProducerBlock = (props: ProducerBlockProps) => {
                                     key={index}
                                     className="ProducerBlock-transition-group-collapse-root">
                                     <SyntaxInputTextField
+                                        autoComplete="off"
                                         fullWidth
                                         value={producerRightSide}
                                         onChange={e =>

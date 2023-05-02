@@ -73,6 +73,7 @@ export const automatonSlice = createSlice({
                             automaton,
                             1
                         );
+                        // console.log("new pattern = ", newPattern);
                         state.currentPattern = newPattern;
                         state.analysingPatternRes = res;
                     }
