@@ -25,6 +25,7 @@ import {
     updateAnalysingPattern
 } from "@/store/reducers/automaton";
 import { showTemporaryToastText } from "@/store/reducers/toast";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface AnalysisControlWidgetProps {
     bottomDrawerOpen: boolean;
@@ -140,6 +141,8 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
         );
     }, [analysingPatternRes]);
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
         <Box
             className={styles["AnalysisControlWidget-root"]}
@@ -148,9 +151,11 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
             }}>
             <Box
                 sx={{
-                    transition: transition,
-                    marginBottom: marginBottom,
-                    transform: `translate(4.5rem, -2.4rem)`
+                    transition: minWidth900px ? transition : undefined,
+                    marginBottom: minWidth900px ? marginBottom : "40vh",
+                    transform: minWidth900px
+                        ? `translate(4.5rem, -2.4rem)`
+                        : `translate(0, -2.4rem)`
                 }}>
                 <Box>
                     <Grow in={automaton !== null}>

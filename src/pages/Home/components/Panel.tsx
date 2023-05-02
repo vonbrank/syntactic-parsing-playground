@@ -22,6 +22,7 @@ import { updateInputSentence } from "@/store/reducers/automaton";
 import AnalysisPattern from "./AnalysisPattern";
 import { Divider } from "@mui/material";
 import { showTemporaryToastText } from "../../../store/reducers/toast/toast";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface SyntaxInputPanelProps {
     bottomDrawerOpen: boolean;
@@ -53,6 +54,8 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
         }
     };
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
         <>
             <Stack
@@ -74,7 +77,7 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                         />
                     ))}
                 </Tabs>
-                {!bottomDrawerOpen && (
+                {!bottomDrawerOpen && minWidth900px && (
                     <Stack alignItems={"center"}>
                         <IconButton
                             onClick={() =>
@@ -89,8 +92,13 @@ export const SyntaxInputPanel = (props: SyntaxInputPanelProps) => {
                     </Stack>
                 )}
             </Stack>
-            <Stack width={"32rem"} sx={{ overflowY: "auto" }}>
-                <Stack alignItems={"center"} sx={{ flexGrow: 1 }}>
+            <Stack
+                width={minWidth900px ? "32rem" : "100%"}
+                height="100%"
+                sx={{ overflowY: "auto" }}>
+                <Stack
+                    alignItems={"center"}
+                    sx={{ flexGrow: 1, overflowY: "auto" }}>
                     <SyntaxInputSection />
                 </Stack>
             </Stack>
@@ -105,8 +113,10 @@ export const AnalysisTablePanel = (props: AnalysisTablePanelProps) => {
         automaton: state.automaton.automaton
     }));
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
-        <Stack width={"32rem"}>
+        <Stack width={minWidth900px ? "32rem" : "100%"}>
             <Stack height={"100%"} alignItems="center">
                 <AnalysisTable automaton={automaton} />
             </Stack>
@@ -171,9 +181,11 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
         }
     }, [currentPattern]);
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
         <Stack
-            height={bottomDrawerHeight}
+            height={minWidth900px ? bottomDrawerHeight : 0}
             sx={{
                 position: "relative",
                 padding: "3rem",
@@ -181,6 +193,7 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                     display: "flex",
                     flexDirection: "row"
                 },
+                flexGrow: minWidth900px ? undefined : 1,
                 ...(sx || {})
             }}
             direction="row"
@@ -198,30 +211,33 @@ export const AnalysisPatternPanel = (props: AnalysisPatternPanelProps) => {
                 <Divider orientation="vertical" />
                 <Stack
                     direction="row"
+                    width={"100%"}
                     sx={{
                         flex: 1,
                         width: 0
                     }}>
-                    <Typography>
-                        <SentenceEditor
-                            isLocked={currentPattern !== null}
-                            sentence={inputSentence}
-                            onSentenceChange={handleChangeSentence}
-                            lastConsumedIndex={getLastConsumedIndex()}
-                        />
-                    </Typography>
+                    {/* <Typography width={"100%"}> */}
+                    <SentenceEditor
+                        isLocked={currentPattern !== null}
+                        sentence={inputSentence}
+                        onSentenceChange={handleChangeSentence}
+                        lastConsumedIndex={getLastConsumedIndex()}
+                    />
+                    {/* </Typography> */}
                 </Stack>
             </Stack>
-            <IconButton
-                onClick={() => setBottomDrawerOpen(false)}
-                sx={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    transform: "translateX(-50%)"
-                }}>
-                <CloseIcon />
-            </IconButton>
+            {minWidth900px && (
+                <IconButton
+                    onClick={() => setBottomDrawerOpen(false)}
+                    sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        transform: "translateX(-50%)"
+                    }}>
+                    <CloseIcon />
+                </IconButton>
+            )}
         </Stack>
     );
 };

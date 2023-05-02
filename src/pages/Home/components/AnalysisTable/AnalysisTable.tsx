@@ -12,6 +12,7 @@ import { ReactElement, useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
 import { LR0Automaton } from "../../../../modules/automatons/lr0/LR0";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function createData(
     name: string,
@@ -220,11 +221,15 @@ const AnalysisTable = function (props: AnalysisTableProps) {
         );
     });
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
         <>
-            <Box padding="2.4rem">
-                <Typography textAlign="center">LR 分析表</Typography>
-            </Box>
+            {minWidth900px && (
+                <Box padding="2.4rem">
+                    <Typography textAlign="center">LR 分析表</Typography>
+                </Box>
+            )}
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: "40rem" }} stickyHeader>
                     <TableHead>

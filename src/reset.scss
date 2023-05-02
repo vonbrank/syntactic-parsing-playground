@@ -20,7 +20,6 @@ html {
     -ms-text-size-adjust: 100%;
     -ms-overflow-style: scrollbar;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    font-size: 62.5%; /* 10px simplification: 62.5% of 16px = 10px */
 }
 @-ms-viewport {
     width: device-width;
@@ -274,4 +273,55 @@ mark {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
     background: #9d9d9d;
+}
+
+/* 响应式设计 */
+/*
+phone: 0 ~ 600px
+tab-port: 600px ~ 900px
+tab-land: 900px ~ 1200px
+desktop(default): 1200px ~ 1800px
+big-desktop: 1800px ~ infinity
+*/
+@mixin respond($breakpoint) {
+    @if $breakpoint == phone {
+        @media (max-width: 37.5em) {
+            @content;
+        } //37.5em = 600px
+    }
+    @if $breakpoint == tab-port {
+        @media (max-width: 56.25em) {
+            @content;
+        } //56.25em = 900px
+    }
+    @if $breakpoint == tab-land {
+        @media (max-width: 75em) {
+            @content;
+        } //75em = 1200px
+    }
+    @if $breakpoint == big-desktop {
+        @media (min-width: 112.5em) {
+            @content;
+        } //112.5em = 1800px
+    }
+}
+
+html {
+    // define what 1rem is
+    font-size: 62.5%; //1rem = 16px * 62.5% = 10px
+
+    @include respond(big-desktop) {
+        font-size: 75%; //1rem = 16px * 75% = 12px
+    }
+
+    @include respond(tab-land) {
+        font-size: 56.25%; //1rem = 16px * 56.25% = 9px
+    }
+
+    @include respond(tab-port) {
+        font-size: 50%; //1rem = 16px * 50% = 8px
+    }
+    @include respond(phone) {
+        font-size: 37.5%; //1rem = 16px * 37.5% = 6px
+    }
 }

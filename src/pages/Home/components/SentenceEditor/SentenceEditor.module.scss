@@ -1,7 +1,5 @@
 .divSentenceEditorWrapper {
-    width: 600px;
-    height: 24rem;
-    max-height: 24rem;
+    flex-grow: 1;
     position: relative;
     font-size: 1.6rem;
     line-height: 20px;
@@ -11,7 +9,7 @@
 }
 
 .divLineNumberWrapper {
-    min-width: 90px;
+    min-width: 9rem;
     min-height: 100%;
 
     color: #237893;

@@ -1,5 +1,14 @@
-import React from "react";
-import { Stack, StackProps, Toolbar, Box, useTheme } from "@mui/material";
+import React, { useState } from "react";
+import {
+    Stack,
+    StackProps,
+    Toolbar,
+    Box,
+    useTheme,
+    useMediaQuery,
+    Tabs,
+    Tab
+} from "@mui/material";
 import Drawer from "@mui/material/Drawer";
 import { Theme } from "@mui/material/styles";
 
@@ -68,6 +77,19 @@ const SidePanelContainer = (props: SidePanelContainerProps) => {
     );
 };
 
+const panelOptionsName = {
+    SyntaxInput: "文法定义",
+    AnalysingPattern: "分析格局/句子输入",
+    AnalysingTable: "LR 分析表"
+};
+
+type PanelOption = keyof typeof panelOptionsName;
+const panelOptions: PanelOption[] = [
+    "SyntaxInput",
+    "AnalysingPattern",
+    "AnalysingTable"
+];
+
 interface AnalysisPanelsContainerProps {
     leftPanel: React.ReactNode;
     rightPanel: React.ReactNode;
@@ -89,7 +111,9 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
         analysisControlWidget
     } = props;
 
-    return (
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
+    const minWidth900pxLayout = (
         <>
             <Drawer
                 PaperProps={{
@@ -124,4 +148,47 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
             {analysisControlWidget}
         </>
     );
+
+    const [currentPanel, setCurrentPanel] =
+        useState<PanelOption>("SyntaxInput");
+
+    const maxWidth900pxLayout = (
+        <>
+            <Drawer anchor="bottom" variant="persistent" open={true}>
+                <Stack height={"40vh"} sx={{ position: "relative" }}>
+                    <Box>
+                        <Tabs
+                            variant="fullWidth"
+                            value={currentPanel}
+                            onChange={(e, newValue) =>
+                                setCurrentPanel(newValue)
+                            }>
+                            {panelOptions.map(panelOption => (
+                                <Tab
+                                    value={panelOption}
+                                    label={panelOptionsName[panelOption]}
+                                />
+                            ))}
+                        </Tabs>
+                    </Box>
+                    <Stack sx={{ flex: 1, height: 0 }}>
+                        {currentPanel === "SyntaxInput" && (
+                            <Stack direction={"row"} sx={{ overflowY: "auto" }}>
+                                {leftPanel}
+                            </Stack>
+                        )}
+                        {currentPanel === "AnalysingPattern" && bottomPanel}
+                        {currentPanel === "AnalysingTable" && (
+                            <Stack direction={"row"} sx={{ overflowY: "auto" }}>
+                                {rightPanel}
+                            </Stack>
+                        )}
+                    </Stack>
+                </Stack>
+            </Drawer>
+            {analysisControlWidget}
+        </>
+    );
+
+    return <>{minWidth900px ? minWidth900pxLayout : maxWidth900pxLayout}</>;
 };

@@ -23,6 +23,7 @@ import {
 import { Box, Divider, Paper, Stack } from "@mui/material";
 import "reactflow/dist/style.css";
 import Typography from "@mui/material/Typography/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 interface AutomatonGraphProps {
     automaton: LR0Automaton | null;
@@ -471,13 +472,15 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
         });
     }, [currentPattern]);
 
+    const minWidth900px = useMediaQuery("(min-width:900px)");
+
     return (
         <Box
             height="100vh"
             width="100vw"
             sx={{
-                paddingLeft: paddingLeft,
-                paddingRight: paddingRight,
+                paddingLeft: minWidth900px ? paddingLeft : 0,
+                paddingRight: minWidth900px ? paddingRight : 0,
                 paddingTop: paddingTop
             }}>
             <ReactFlow
