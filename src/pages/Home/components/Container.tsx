@@ -154,7 +154,7 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
 
     const maxWidth900pxLayout = (
         <>
-            <Drawer anchor="bottom" variant="persistent" open={true}>
+            <Drawer anchor="bottom" variant="permanent">
                 <Stack height={"40vh"} sx={{ position: "relative" }}>
                     <Box>
                         <Tabs
@@ -172,17 +172,41 @@ export const AnalysisPanelsContainer: React.FC<AnalysisPanelsContainerProps> = (
                         </Tabs>
                     </Box>
                     <Stack sx={{ flex: 1, height: 0 }}>
-                        {currentPanel === "SyntaxInput" && (
-                            <Stack direction={"row"} sx={{ overflowY: "auto" }}>
+                        {
+                            <Stack
+                                display={
+                                    currentPanel === "SyntaxInput"
+                                        ? "flex"
+                                        : "none"
+                                }
+                                direction="row"
+                                sx={{ overflowY: "auto", flex: 1 }}>
                                 {leftPanel}
                             </Stack>
-                        )}
-                        {currentPanel === "AnalysingPattern" && bottomPanel}
-                        {currentPanel === "AnalysingTable" && (
-                            <Stack direction={"row"} sx={{ overflowY: "auto" }}>
+                        }
+                        {
+                            <Stack
+                                display={
+                                    currentPanel === "AnalysingPattern"
+                                        ? "flex"
+                                        : "none"
+                                }
+                                sx={{ flex: 1 }}>
+                                {bottomPanel}
+                            </Stack>
+                        }
+                        {
+                            <Stack
+                                display={
+                                    currentPanel === "AnalysingTable"
+                                        ? "flex"
+                                        : "none"
+                                }
+                                direction={"row"}
+                                sx={{ overflowY: "auto", flex: 1 }}>
                                 {rightPanel}
                             </Stack>
-                        )}
+                        }
                     </Stack>
                 </Stack>
             </Drawer>

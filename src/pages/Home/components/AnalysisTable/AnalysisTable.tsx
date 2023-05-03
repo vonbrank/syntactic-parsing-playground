@@ -232,29 +232,42 @@ const AnalysisTable = function (props: AnalysisTableProps) {
             )}
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: "40rem" }} stickyHeader>
-                    <TableHead>
-                        <TableRow>
+                    <TableHead
+                        sx={{
+                            position: "sticky",
+                            top: 0,
+                            left: 0,
+                            zIndex: 1
+                        }}>
+                        <TableRow
+                            sx={{
+                                position: "relative",
+                                zIndex: 1
+                            }}>
                             <TableCell
                                 align="center"
                                 rowSpan={2}
                                 sx={{
                                     position: "sticky",
                                     left: 0,
-                                    zIndex: 3,
+                                    top: 0,
+                                    zIndex: 1,
                                     borderRight:
                                         "1px solid rgba(224, 224, 224, 1)"
                                 }}>
                                 <Typography>状态</Typography>
                             </TableCell>
                             <TableCell
+                                sx={{ zIndex: 0, position: "relative" }}
                                 align="center"
                                 colSpan={
                                     (tableData || tableDataPlaceHolder)
-                                        .actionSize
+                                        .actionSize + 1
                                 }>
                                 <Typography>ACTION</Typography>
                             </TableCell>
                             <TableCell
+                                sx={{ zIndex: 0, position: "relative" }}
                                 align="center"
                                 colSpan={
                                     (tableData || tableDataPlaceHolder).gotoSize
@@ -264,9 +277,8 @@ const AnalysisTable = function (props: AnalysisTableProps) {
                         </TableRow>
                         <TableRow
                             sx={{
-                                "& .MuiTableCell-root": {
-                                    top: "calc(2.4rem + 32px + 1px)"
-                                }
+                                position: "relative",
+                                zIndex: 0
                             }}>
                             {tableData && (
                                 <>
@@ -294,6 +306,8 @@ const AnalysisTable = function (props: AnalysisTableProps) {
                     </TableHead>
                     <TableBody
                         sx={{
+                            position: "relative",
+                            zIndex: 0,
                             "& .MuiTableRow-root .MuiTableCell-root:first-of-type":
                                 {
                                     position: "sticky",
@@ -345,7 +359,7 @@ const AnalysisTable = function (props: AnalysisTableProps) {
                             </>
                         ) : (
                             <TableRow>
-                                <TableCell align="center" colSpan={3}>
+                                <TableCell align="center" colSpan={4}>
                                     <Typography>{"暂无数据"}</Typography>
                                 </TableCell>
                             </TableRow>

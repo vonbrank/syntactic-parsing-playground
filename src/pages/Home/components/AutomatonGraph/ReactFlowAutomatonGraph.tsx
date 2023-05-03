@@ -1,4 +1,4 @@
-import React, { useEffect, memo } from "react";
+import React, { useEffect, memo, useState } from "react";
 import {
     LR0AnalysingPattern,
     LR0Automaton,
@@ -32,7 +32,8 @@ interface AutomatonGraphProps {
 
 const paddingLeft = `${32 + 9}rem`;
 const paddingRight = `${32}rem`;
-const paddingTop = `${6.4}rem`;
+const paddingTopMin600px = `${64}px`;
+const paddingTopMax600px = `${56}px`;
 
 interface AutomatonNodeData {
     label: string;
@@ -473,6 +474,22 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
     }, [currentPattern]);
 
     const minWidth900px = useMediaQuery("(min-width:900px)");
+    const minWidth600px = useMediaQuery("(min-width:600px)");
+
+    const [miniMapSize, setMiniMapSize] = useState<[number, number]>([
+        200, 150
+    ]);
+    const [miniMapWidth, miniMapHeight] = miniMapSize;
+
+    useEffect(() => {
+        if (minWidth900px) {
+            setMiniMapSize([200, 150]);
+        } else if (minWidth600px) {
+            setMiniMapSize([160, 120]);
+        } else {
+            setMiniMapSize([120, 90]);
+        }
+    }, [minWidth600px, minWidth900px]);
 
     return (
         <Box
@@ -481,7 +498,13 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
             sx={{
                 paddingLeft: minWidth900px ? paddingLeft : 0,
                 paddingRight: minWidth900px ? paddingRight : 0,
-                paddingTop: paddingTop
+                paddingTop: minWidth600px
+                    ? paddingTopMax600px
+                    : paddingTopMax600px,
+                "& .react-flow__minimap svg": {
+                    width: miniMapWidth,
+                    height: miniMapHeight
+                }
             }}>
             <ReactFlow
                 nodes={nodes}
@@ -491,7 +514,7 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 nodeTypes={nodeTypes}
                 fitView
                 nodesConnectable={false}>
-                <MiniMap position="top-right" />
+                <MiniMap position="top-right" zoomable pannable />
                 <Background />
                 <Controls position="top-left" />
             </ReactFlow>
