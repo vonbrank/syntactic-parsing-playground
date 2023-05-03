@@ -6,6 +6,9 @@
 
 本项目允许您在线地输入符合要求的文法，一键生成并可视化文法对应的 `LR` 自动机、`LL` 分析器及其分析表，同时允许您输入文本、利用自动机进行语法分析、展示此过程中每一步的分析格局。
 
+![demo](
+https://vonbrank-images.oss-cn-hangzhou.aliyuncs.com/20230503-Syntactic-Parsing-Playground/syntactic-parsing-banner.jpg)
+
 本项目仍处于开发阶段，您可以通过下表查看各分析器的开发状态。
 
 | 文法类型 |  状态  |
