@@ -147,15 +147,16 @@ export const AnalysisControlWidget = (props: AnalysisControlWidgetProps) => {
         <Box
             className={styles["AnalysisControlWidget-root"]}
             sx={{
+                bottom: minWidth900px ? 0 : "calc(40vh + 2.4rem)",
                 transform: `translate(-50%, 0)`
             }}>
             <Box
                 sx={{
                     transition: minWidth900px ? transition : undefined,
-                    marginBottom: minWidth900px ? marginBottom : "40vh",
+                    marginBottom: minWidth900px ? marginBottom : 0,
                     transform: minWidth900px
                         ? `translate(4.5rem, -2.4rem)`
-                        : `translate(0, -2.4rem)`
+                        : undefined
                 }}>
                 <Box>
                     <Grow in={automaton !== null}>

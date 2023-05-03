@@ -1,7 +1,6 @@
 .AnalysisControlWidget {
     &-root {
-        position: absolute;
-        bottom: 0;
+        position: fixed;
         left: 50%;
         transform: translateX(-50%);
     }

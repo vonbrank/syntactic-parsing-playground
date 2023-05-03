@@ -504,7 +504,10 @@ const AutomatonGraph = (props: AutomatonGraphProps) => {
                 "& .react-flow__minimap svg": {
                     width: miniMapWidth,
                     height: miniMapHeight
-                }
+                },
+                position: "fixed",
+                left: 0,
+                right: 0
             }}>
             <ReactFlow
                 nodes={nodes}
