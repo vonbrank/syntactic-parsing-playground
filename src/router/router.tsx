@@ -1,6 +1,7 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/Home";
+import { getBaseUrlByHostname } from "../../config";
 
 const customRouter = createBrowserRouter(
     [
@@ -9,7 +10,7 @@ const customRouter = createBrowserRouter(
             element: <Home />
         }
     ],
-    { basename: "/syntactic-parsing-playground" }
+    { basename: getBaseUrlByHostname(window.location.hostname) }
 );
 
 export default customRouter;

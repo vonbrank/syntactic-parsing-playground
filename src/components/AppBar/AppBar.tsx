@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import { GITHUB_REPO_URL } from "../../../config";
 
 interface DefaultAppBarProps extends AppBarProps {
     onMenuButtonClick?: () => void;
@@ -64,10 +65,7 @@ const DefaultAppBar = (props: DefaultAppBarProps) => {
                             size="large"
                             color="inherit"
                             onClick={() => {
-                                window.open(
-                                    "https://github.com/vonbrank/syntactic-parsing-playground",
-                                    "_blank"
-                                );
+                                window.open(GITHUB_REPO_URL, "_blank");
                             }}>
                             <GitHubIcon />
                         </IconButton>
