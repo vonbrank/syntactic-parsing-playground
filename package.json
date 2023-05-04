@@ -7,7 +7,12 @@
     "dev": "vite",
     "build": "tsc && vite build && touch dist/.nojekyll",
     "preview": "vite preview",
-    "deploy": "./scripts/deploy.bat"
+    "deploy": "./scripts/deploy.bat",
+    
+    "build-github": "set DEPLOY_PLATFORM=github&& tsc && vite build",
+    "build-gitee": "set DEPLOY_PLATFORM=gitee&& tsc && vite build",
+    "deploy-github": "set DEPLOY_PLATFORM=github&& ./scripts/deploy.bat",
+    "deploy-gitee": "set DEPLOY_PLATFORM=gitee&& ./scripts/deploy.bat"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",

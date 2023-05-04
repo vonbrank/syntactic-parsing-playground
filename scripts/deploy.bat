@@ -13,14 +13,20 @@ if "%hour:~0,1%"==" " set hour=0%hour:~1,1%
 set minute=%time:~3,2%
 set second=%time:~6,2%
 set timestamp=%year%-%month%-%day% %hour%:%minute%:%second%
+set branch="github-page"
+if "%DEPLOY_PLATFORM%"=="gitee" set branch="gitee-page"
 
 cd "%DEPLOY_DIR%"
+
+echo "" > .nojekyll
+if "%DEPLOY_PLATFORM%"=="github" echo syntactic-parsing-playground.vonbrank.com > CNAME
+
 git init
 git add .
 git commit -m "Site deployed: %timestamp%"
 git remote add origin git@github.com:vonbrank/syntactic-parsing-playground.git
-git branch -M gh-page
-git push -f origin gh-page:gh-page
+git branch -M %branch%
+git push -f origin %branch%:%branch%
 
 cd "%SCRIPT_DIR%\.."
 rmdir /S /Q "%DEPLOY_DIR%"
