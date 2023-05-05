@@ -6,12 +6,12 @@ export interface LR0Production {
 interface LR0GrammarBase {
     name?: string;
     productions: LR0Production[];
+    startCharacter: string;
 }
 
 export interface LR0RawGrammar extends LR0GrammarBase {}
 
 export interface LR0StandardGrammar extends LR0GrammarBase {
-    startCharacter: string;
     nonTerminals: string[];
     terminals: string[];
 }
@@ -53,10 +53,13 @@ const getItemNextSymbole = (item: LR0Item) => {
 };
 
 export const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
-    const { productions } = rawGrammar;
-    const rawNonTerminals = productions.map(production => production.leftSide);
-
-    // const startCharacter = `${rawNonTerminals[0]}'`;
+    const { productions, startCharacter } = rawGrammar;
+    const rawNonTerminals = productions.reduce((acc, production) => {
+        if (acc.findIndex(item => item === production.leftSide) === -1) {
+            return [...acc, production.leftSide];
+        }
+        return acc;
+    }, [] as string[]);
 
     const nonTerminals = [...rawNonTerminals];
 
@@ -86,26 +89,16 @@ export const rawGrammarToStandardGrammar = (rawGrammar: LR0RawGrammar) => {
         (terminal, index) =>
             repeatTerminals.findIndex(item => item === terminal) === index
     );
-
-    const rightSymbols = standarProductions.reduce((acc, production) => {
-        return [...acc, ...production.rightSide];
-    }, [] as string[]);
-    let startCharacter = "";
-    nonTerminals.forEach(nonTerminal => {
-        if (rightSymbols.findIndex(symbol => symbol === nonTerminal) === -1) {
-            startCharacter = nonTerminal;
-        }
-    });
+    const extendStartCharacter = `${startCharacter}'`;
     standarProductions = [
-        { leftSide: `${startCharacter}'`, rightSide: [startCharacter] },
+        { leftSide: extendStartCharacter, rightSide: [startCharacter] },
         ...standarProductions
     ];
-    startCharacter = `${startCharacter}'`;
 
     const standardGrammar: LR0StandardGrammar = {
         ...rawGrammar,
         productions: standarProductions,
-        startCharacter: startCharacter,
+        startCharacter: extendStartCharacter,
         nonTerminals: nonTerminals,
         terminals: terminals
     };
@@ -512,7 +505,7 @@ export const checkRawGrammar: (
 ) => GrammarCheckResult = grammar => {
     const standardGrammar = rawGrammarToStandardGrammar(grammar);
     const { productions, nonTerminals } = standardGrammar;
-    const startSymbols: string[] = [];
+    const startSymbol = grammar.startCharacter;
 
     const errorMessages: string[] = [];
 
@@ -522,25 +515,16 @@ export const checkRawGrammar: (
         return [...acc, ...production.rightSide.map(symbol => symbol)];
     }, [] as string[]);
 
-    leftSymbols.forEach(leftSymbol => {
-        if (
-            rightSymbols.findIndex(
-                rightSymbol => leftSymbol === rightSymbol
-            ) === -1 &&
-            startSymbols.findIndex(
-                startSymbol => startSymbol === leftSymbol
-            ) === -1
-        ) {
-            startSymbols.push(leftSymbol);
-        }
-    });
-
-    if (startSymbols.length > 1) {
-        errorMessages.push(
-            `合法的文法应该只包含一个开始符号，但是现在有 ${
-                startSymbols.length
-            } 个：${startSymbols.join("，")}`
-        );
+    if (startSymbol === "") {
+        errorMessages.push(`开始符号不能为空字符串`);
+    } else if (/\s/.test(startSymbol)) {
+        errorMessages.push(`开始符号应只有一个，且不能包含任何空白字符`);
+    } else if (
+        standardGrammar.nonTerminals.findIndex(
+            nonTerminal => nonTerminal === startSymbol
+        ) === -1
+    ) {
+        errorMessages.push(`开始符号应该是至少一个产生式的左部`);
     }
 
     rightSymbols.forEach(rightSymbol => {
@@ -556,6 +540,13 @@ export const checkRawGrammar: (
         if (isNonterminal && !hasDefination)
             errorMessages.push(`缺少定义非终结符 ${rightSymbol} 的产生式`);
     });
+
+    if (
+        standardGrammar.terminals.findIndex(terminal => terminal.length > 1) !==
+        -1
+    ) {
+        errorMessages.push(`目前不支持对终结符包含多个字符的文法进行分析`);
+    }
 
     const res: GrammarCheckResult = {
         standardGrammar: standardGrammar,

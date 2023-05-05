@@ -47,6 +47,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import Alert from "@mui/material/Alert";
 
 const exampleGrammar1: LR0RawGrammar = {
+    startCharacter: "expr",
     productions: [
         {
             leftSide: "expr",
@@ -63,6 +64,7 @@ const exampleGrammar1: LR0RawGrammar = {
     ]
 };
 const exampleGrammar2: LR0RawGrammar = {
+    startCharacter: "S",
     productions: [
         {
             leftSide: "S",
@@ -79,6 +81,7 @@ const exampleGrammar2: LR0RawGrammar = {
     ]
 };
 const exampleGrammar3: LR0RawGrammar = {
+    startCharacter: "E",
     productions: [
         {
             leftSide: "E",
@@ -165,6 +168,10 @@ const SyntaxInputSection = () => {
         });
     };
 
+    const handleChangeStartCharacter = (newValue: string) => {
+        setGrammar(current => ({ ...current, startCharacter: newValue }));
+    };
+
     const [activeStep, setActiveStep] = useState<0 | 1 | 2>(0);
 
     const getStepContent = (
@@ -212,30 +219,49 @@ const SyntaxInputSection = () => {
                                     }
                                 }}
                                 spacing="2rem">
-                                <TransitionGroup className="SyntaxInputSection-transition-group">
-                                    {grammar.productions.map((item, index) => (
-                                        <Collapse
-                                            key={index}
-                                            className="SyntaxInputSection-transition-group-collapse-root">
-                                            <ProducerBlock
-                                                key={index}
-                                                production={item}
-                                                onChangeProduction={newProduction =>
-                                                    handleChangeProduction(
-                                                        newProduction,
-                                                        index
-                                                    )
-                                                }
-                                                onDeleteProduction={() =>
-                                                    handleDeleteProduction(
-                                                        index
-                                                    )
-                                                }
-                                            />
-                                            <Divider />
-                                        </Collapse>
-                                    ))}
-                                </TransitionGroup>
+                                <Stack spacing="0.8rem">
+                                    <Typography>开始符号：</Typography>
+                                    <SyntaxInputTextField
+                                        value={grammar.startCharacter}
+                                        onChange={e =>
+                                            handleChangeStartCharacter(
+                                                e.target.value
+                                            )
+                                        }
+                                        autoComplete="off"
+                                        fullWidth
+                                    />
+                                </Stack>
+                                <Divider sx={{ borderBottomWidth: "2px" }} />
+                                <Stack spacing="2rem">
+                                    <Typography>产生式：</Typography>
+                                    <TransitionGroup className="SyntaxInputSection-transition-group">
+                                        {grammar.productions.map(
+                                            (item, index) => (
+                                                <Collapse
+                                                    key={index}
+                                                    className="SyntaxInputSection-transition-group-collapse-root">
+                                                    <ProducerBlock
+                                                        key={index}
+                                                        production={item}
+                                                        onChangeProduction={newProduction =>
+                                                            handleChangeProduction(
+                                                                newProduction,
+                                                                index
+                                                            )
+                                                        }
+                                                        onDeleteProduction={() =>
+                                                            handleDeleteProduction(
+                                                                index
+                                                            )
+                                                        }
+                                                    />
+                                                    <Divider />
+                                                </Collapse>
+                                            )
+                                        )}
+                                    </TransitionGroup>
+                                </Stack>
 
                                 <Button
                                     variant="contained"
@@ -259,9 +285,12 @@ const SyntaxInputSection = () => {
                                 <>
                                     <StandardGrammarBlock label="非终结符">
                                         <Typography className="Grammar-Symbol">
-                                            {checkRes.standardGrammar.nonTerminals.join(
-                                                ", "
-                                            )}
+                                            {[
+                                                checkRes.standardGrammar
+                                                    .startCharacter,
+                                                ...checkRes.standardGrammar
+                                                    .nonTerminals
+                                            ].join(", ")}
                                         </Typography>
                                     </StandardGrammarBlock>
                                     <StandardGrammarBlock label="终结符">
